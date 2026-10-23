@@ -6,7 +6,9 @@ from pathlib import Path
 # from sqlalchemy import DateTime, String, Text, create_engine  # 2026-10-23：原导入保留供对照。
 # from sqlalchemy import DateTime, ForeignKey, Integer, String, Text, create_engine  # 2026-10-23：原导入暂留供对照。
 # 2026-10-23：本次修改原因：为可维护选项和审核状态增加布尔字段。
-from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, Text, create_engine
+# from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, Text, create_engine  # 2026-10-24：原导入保留供对照。
+# 2026-10-24：本次修改原因：为已存在的 SQLite 指标表补充在看数和原始展示值列。
+from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, Text, create_engine, inspect
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, sessionmaker
 
 
@@ -141,3 +143,140 @@ class ContentStrategyReferenceModel(Base):
     title: Mapped[str] = mapped_column(String(300), nullable=False)
     source_url: Mapped[str] = mapped_column(String(1000), nullable=False)
     provider: Mapped[str] = mapped_column(String(30), nullable=False)
+
+
+# 2026-10-23：本次修改原因：以关联表扩展旧样本，避免现有 SQLite 文章表增加字段后无法直接迁移。
+class ArticleMetadataModel(Base):
+    __tablename__ = "article_metadata"
+
+    sample_id: Mapped[str] = mapped_column(ForeignKey("content_samples.id"), primary_key=True)
+    author_id: Mapped[str | None] = mapped_column(String(200))
+    # 2026-10-23：本次修改原因：传播表现仅与账号规模相近的文章比较，缺失时保持未分组。
+    account_followers: Mapped[int | None] = mapped_column(Integer)
+    published_at: Mapped[str | None] = mapped_column(String(10))
+    audience_id: Mapped[str | None] = mapped_column(String(64))
+    topic: Mapped[str | None] = mapped_column(String(200))
+    tags_json: Mapped[str] = mapped_column(Text, default="[]", nullable=False)
+    usage_rights_note: Mapped[str | None] = mapped_column(Text)
+    # 2026-10-24：本次修改原因：保存 RedFox 三种公众号接口的查询条件和原始非正文返回字段。
+    source_data_json: Mapped[str] = mapped_column(Text, default="{}", nullable=False)
+    review_status: Mapped[str] = mapped_column(String(20), default="ready", nullable=False)
+    content_hash: Mapped[str] = mapped_column(String(64), nullable=False)
+    collected_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False
+    )
+
+
+# 2026-10-24：本次修改原因：候选文章补齐后先持久化为待收录草稿，供跨页批量确认入库。
+class CandidateDraftModel(Base):
+    __tablename__ = "candidate_drafts"
+
+    candidate_key: Mapped[str] = mapped_column(String(1200), primary_key=True)
+    value_json: Mapped[str] = mapped_column(Text, nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+
+# 2026-10-23：本次修改原因：互动数据按采集时间保存快照，避免覆盖历史读数和混用缺失指标。
+class ArticleMetricModel(Base):
+    __tablename__ = "article_metrics"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    sample_id: Mapped[str] = mapped_column(ForeignKey("content_samples.id"), nullable=False)
+    captured_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    source: Mapped[str] = mapped_column(String(100), nullable=False)
+    impressions: Mapped[int | None] = mapped_column(Integer)
+    clicks: Mapped[int | None] = mapped_column(Integer)
+    reads: Mapped[int | None] = mapped_column(Integer)
+    likes: Mapped[int | None] = mapped_column(Integer)
+    # 2026-10-24：本次修改原因：公众号“在看”有独立含义，不混入点赞或收藏。
+    watch_count: Mapped[int | None] = mapped_column(Integer)
+    saves: Mapped[int | None] = mapped_column(Integer)
+    # 2026-10-24：本次修改原因：关键词打赏和榜单互动量与其他指标分开保存。
+    reward_count: Mapped[int | None] = mapped_column(Integer)
+    interactive_count: Mapped[int | None] = mapped_column(Integer)
+    comments: Mapped[int | None] = mapped_column(Integer)
+    shares: Mapped[int | None] = mapped_column(Integer)
+    # 2026-10-24：本次修改原因：保留“10W+”等原始读数供核对，不将其伪装成精确整数。
+    raw_counts_json: Mapped[str] = mapped_column(Text, default="{}", nullable=False)
+
+
+# 2026-10-24：本次修改原因：create_all 不会给旧表加列，启动时只补缺失的指标列。
+def ensure_article_metric_columns() -> None:
+    columns = {column["name"] for column in inspect(engine).get_columns("article_metrics")}
+    with engine.begin() as connection:
+        if "watch_count" not in columns:
+            connection.exec_driver_sql("ALTER TABLE article_metrics ADD COLUMN watch_count INTEGER")
+        if "raw_counts_json" not in columns:
+            connection.exec_driver_sql("ALTER TABLE article_metrics ADD COLUMN raw_counts_json TEXT NOT NULL DEFAULT '{}'")
+        # 2026-10-24：本次修改原因：旧数据库保留原有快照并补充两项公众号专有读数。
+        if "reward_count" not in columns:
+            connection.exec_driver_sql("ALTER TABLE article_metrics ADD COLUMN reward_count INTEGER")
+        if "interactive_count" not in columns:
+            connection.exec_driver_sql("ALTER TABLE article_metrics ADD COLUMN interactive_count INTEGER")
+
+
+# 2026-10-24：本次修改原因：旧文章元数据表无需重建即可保存来源接口字段。
+def ensure_article_source_columns() -> None:
+    columns = {column["name"] for column in inspect(engine).get_columns("article_metadata")}
+    if "source_data_json" not in columns:
+        with engine.begin() as connection:
+            connection.exec_driver_sql("ALTER TABLE article_metadata ADD COLUMN source_data_json TEXT NOT NULL DEFAULT '{}'")
+
+
+# 2026-10-23：本次修改原因：原文与可重算的单篇特征分开存储，并记录算法及输入正文版本。
+class ArticleFeatureModel(Base):
+    __tablename__ = "article_features"
+
+    sample_id: Mapped[str] = mapped_column(ForeignKey("content_samples.id"), primary_key=True)
+    algorithm_version: Mapped[str] = mapped_column(String(40), nullable=False)
+    content_hash: Mapped[str] = mapped_column(String(64), nullable=False)
+    features_json: Mapped[str] = mapped_column(Text, nullable=False)
+    analyzed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+
+# 2026-10-23：本次修改原因：记录每次画像分析的范围、方法和结果，供用户核对失败或重分析原因。
+class ArticleAnalysisRunModel(Base):
+    __tablename__ = "article_analysis_runs"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    scope_json: Mapped[str] = mapped_column(Text, nullable=False)
+    status: Mapped[str] = mapped_column(String(20), nullable=False)
+    method: Mapped[str] = mapped_column(String(80), nullable=False)
+    error: Mapped[str | None] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+# 2026-10-23：本次修改原因：保存同类文章聚合画像的不可变版本和所依据的样本范围。
+class StyleProfileModel(Base):
+    __tablename__ = "style_profiles"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    platform_id: Mapped[str] = mapped_column(String(64), nullable=False)
+    category_id: Mapped[str] = mapped_column(String(64), nullable=False)
+    format_id: Mapped[str | None] = mapped_column(String(64))
+    audience_id: Mapped[str | None] = mapped_column(String(64))
+    version: Mapped[int] = mapped_column(Integer, nullable=False)
+    sample_count: Mapped[int] = mapped_column(Integer, nullable=False)
+    profile_json: Mapped[str] = mapped_column(Text, nullable=False)
+    method: Mapped[str] = mapped_column(String(80), nullable=False)
+    model_name: Mapped[str | None] = mapped_column(String(100))
+    run_id: Mapped[str] = mapped_column(ForeignKey("article_analysis_runs.id"), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+
+# 2026-10-23：本次修改原因：画像和策略均保留来源关系，不依赖可被后续修改的临时筛选结果。
+class StyleProfileArticleModel(Base):
+    __tablename__ = "style_profile_articles"
+
+    profile_id: Mapped[str] = mapped_column(ForeignKey("style_profiles.id"), primary_key=True)
+    sample_id: Mapped[str] = mapped_column(ForeignKey("content_samples.id"), primary_key=True)
+    # 2026-10-23：本次修改原因：画像固定创建时的正文版本，后续文章修改不能悄悄改变策略依据。
+    content_hash: Mapped[str] = mapped_column(String(64), nullable=False)
+
+
+class StrategyProfileLinkModel(Base):
+    __tablename__ = "strategy_profile_links"
+
+    strategy_id: Mapped[str] = mapped_column(ForeignKey("content_strategies.id"), primary_key=True)
+    profile_id: Mapped[str] = mapped_column(ForeignKey("style_profiles.id"), nullable=False)

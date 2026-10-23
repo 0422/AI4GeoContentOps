@@ -8,12 +8,17 @@ from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel, Field
 # from sqlalchemy import select  # 2026-10-23：原导入保留供对照。
 # 2026-10-23：本次修改原因：重新提炼草稿时清除已不适用的候选文章引用。
-from sqlalchemy import delete, select
+# from sqlalchemy import delete, select  # 2026-10-23：原导入保留供对照。
+# 2026-10-23：本次修改原因：旧样本接口排除待核对文章，并供策略页读取完整的试用样本组。
+from sqlalchemy import delete, or_, select
 
 from app.content_config import OPTION_KINDS, require_option
 from app.db import ContentOptionModel, ContentSampleModel, ContentStrategyModel, SessionLocal
 # 2026-10-23：本次修改原因：策略列表展示自动分析的原文来源。
 from app.db import ContentStrategyReferenceModel
+# 2026-10-23：本次修改原因：新入库样本同步记录正文指纹和复核状态，旧接口继续可用。
+from app.article_library_service import content_hash
+from app.db import ArticleMetadataModel, StrategyProfileLinkModel, StyleProfileArticleModel, StyleProfileModel
 from app.strategy_service import StrategyGuide, create_draft, extract_guide, match_strategy
 # 2026-10-23：本次修改原因：候选文章的写法分析归内容策略模块负责，RedFox 服务只负责获取正文。
 from app.redfox_service import RedFoxError, get_wechat_article
@@ -133,11 +138,17 @@ def sample_read(row: ContentSampleModel) -> SampleRead:
 
 
 @router.get("/samples", response_model=list[SampleRead])
-def list_samples(limit: int = Query(default=100, ge=1, le=200)) -> list[SampleRead]:
+# def list_samples(limit: int = Query(default=100, ge=1, le=200)) -> list[SampleRead]:  # 2026-10-23：旧上限保留供对照。
+# 2026-10-23：本次修改原因：策略选样可覆盖首阶段 100–300 篇，并跳过待核对或已排除文章。
+def list_samples(limit: int = Query(default=500, ge=1, le=1000)) -> list[SampleRead]:
     with SessionLocal() as session:
-        rows = session.scalars(select(ContentSampleModel).order_by(
-            ContentSampleModel.created_at.desc()
-        ).limit(limit)).all()
+        # rows = session.scalars(select(ContentSampleModel).order_by(ContentSampleModel.created_at.desc()).limit(limit)).all()  # 2026-10-23：原查询保留供对照。
+        # 2026-10-23：本次修改原因：复核状态与使用权限同步决定旧策略页可见的参考文章。
+        rows = session.scalars(select(ContentSampleModel).outerjoin(
+            ArticleMetadataModel, ArticleMetadataModel.sample_id == ContentSampleModel.id
+        ).where(ContentSampleModel.rights_confirmed.is_(True),
+                or_(ArticleMetadataModel.review_status == "ready", ArticleMetadataModel.sample_id.is_(None)))
+            .order_by(ContentSampleModel.created_at.desc()).limit(limit)).all()
         return [sample_read(row) for row in rows]
 
 
@@ -167,6 +178,10 @@ def create_sample(request: SampleCreate) -> SampleRead:
                 raise HTTPException(status_code=422, detail="来源链接应以 http:// 或 https:// 开头")
             if session.scalar(select(ContentSampleModel.id).where(ContentSampleModel.source_url == source_url)):
                 raise HTTPException(status_code=409, detail="该来源链接已录入")
+        # 2026-10-23：本次修改原因：正文换行差异不应绕过查重，已有旧记录也参与检查。
+        digest = content_hash(body)
+        if any(content_hash(item.body_text) == digest for item in session.scalars(select(ContentSampleModel)).all()):
+            raise HTTPException(status_code=409, detail="相同正文已录入文章库")
         row = ContentSampleModel(
             id=str(uuid4()), title=title, body_text=body,
             platform_id=request.platform_id, category_id=request.category_id,
@@ -174,6 +189,11 @@ def create_sample(request: SampleCreate) -> SampleRead:
             quality_score=request.quality_score, rights_confirmed=True,
         )
         session.add(row)
+        # 2026-10-23：本次修改原因：先生成原文章的数据库默认采集时间，再复制到关联元数据。
+        session.flush()
+        # 2026-10-23：本次修改原因：手动保存的文章先以已核对状态进入统一文章库。
+        session.add(ArticleMetadataModel(sample_id=row.id, tags_json="[]", review_status="ready",
+                                         content_hash=digest, collected_at=row.created_at))
         session.commit()
         session.refresh(row)
         return sample_read(row)
@@ -221,6 +241,9 @@ class StrategyRead(StrategyCreate):
     created_at: datetime
     # 2026-10-23：本次修改原因：自动提炼策略保留来源文章标题与链接，不持久化第三方正文。
     references: list[dict[str, str]] = Field(default_factory=list)
+    # 2026-10-23：本次修改原因：从画像生成的策略可回溯其画像版本。
+    profile_id: str | None = None
+    profile_audience_id: str | None = None
 
 
 def strategy_read(row: ContentStrategyModel) -> StrategyRead:
@@ -229,6 +252,9 @@ def strategy_read(row: ContentStrategyModel) -> StrategyRead:
         refs = source_session.scalars(select(ContentStrategyReferenceModel).where(
             ContentStrategyReferenceModel.strategy_id == row.id
         )).all()
+        # 2026-10-23：本次修改原因：返回策略所依据的画像，供审核者打开来源。
+        profile_link = source_session.get(StrategyProfileLinkModel, row.id)
+        profile = source_session.get(StyleProfileModel, profile_link.profile_id) if profile_link else None
     return StrategyRead(
         id=row.id, title=row.title, platform_id=row.platform_id,
         category_id=row.category_id, format_id=row.format_id,
@@ -237,6 +263,8 @@ def strategy_read(row: ContentStrategyModel) -> StrategyRead:
         version=row.version, created_at=row.created_at,
         references=[{"title": ref.title, "source_url": ref.source_url,
                      "provider": ref.provider} for ref in refs],
+        profile_id=profile_link.profile_id if profile_link else None,
+        profile_audience_id=profile.audience_id if profile else None,
     )
 
 
@@ -261,9 +289,12 @@ def list_strategies() -> list[StrategyRead]:
 @router.get("/strategies/match", response_model=StrategyRead | None)
 def read_matching_strategy(
     platform_id: str, category_id: str | None = None, format_id: str | None = None,
+    # 2026-10-23：本次修改原因：策略预览与创建任务采用相同的受众筛选规则。
+    audience_id: str | None = None,
 ) -> StrategyRead | None:
     with SessionLocal() as session:
-        row = match_strategy(session, platform_id, category_id, format_id)
+        # row = match_strategy(session, platform_id, category_id, format_id)  # 2026-10-23：原匹配调用保留供对照。
+        row = match_strategy(session, platform_id, category_id, format_id, audience_id)
         return strategy_read(row) if row else None
 
 
@@ -311,6 +342,10 @@ def extract_strategy(request: StrategyExtract) -> StrategyRead:
             raise HTTPException(status_code=422, detail="部分所选样本不存在，请刷新样本列表")
         samples = [by_id[sample_id] for sample_id in request.sample_ids]
         for sample in samples:
+            # 2026-10-23：本次修改原因：已排除或待核对文章不可通过旧策略接口继续参与提炼。
+            metadata = session.get(ArticleMetadataModel, sample.id)
+            if metadata and metadata.review_status != "ready":
+                raise HTTPException(status_code=422, detail="所选样本尚未核对或已排除")
             if not sample.rights_confirmed or sample.quality_score < 4:
                 raise HTTPException(status_code=422, detail="只能选择已确认使用权且评分不低于 4 分的样本")
             if sample.platform_id != request.platform_id:
@@ -335,6 +370,9 @@ def extract_strategy(request: StrategyExtract) -> StrategyRead:
 # 2026-10-23：本次修改原因：候选全文分析统一收口到策略模块；只保存提炼结果与原文出处。
 @router.post("/strategies/analyze-candidate", response_model=StrategyRead, status_code=201)
 def analyze_candidate(request: StrategyCandidateAnalyze) -> StrategyRead:
+    # 2026-10-23：本次修改原因：候选文章须先核对权限并入库，禁止绕过统一样本链直接发布策略。
+    raise HTTPException(status_code=410, detail="请先在参考文章库核对并保存文章，再从样本或画像创建策略草稿")
+    # 2026-10-23：旧候选直提炼实现暂留供对照，当前入口不再执行。
     if not request.title.strip():
         raise HTTPException(status_code=422, detail="候选文章标题不能为空")
     with SessionLocal() as session:
@@ -402,6 +440,32 @@ def publish_strategy(strategy_id: str) -> StrategyRead:
             raise HTTPException(status_code=404, detail="策略不存在")
         if row.status != "draft":
             raise HTTPException(status_code=409, detail="只有草稿可以发布")
+        # 2026-10-23：本次修改原因：画像来源若在草稿审核期间变更或失去权限，不允许沿用旧画像发布。
+        profile_link = session.get(StrategyProfileLinkModel, row.id)
+        if profile_link:
+            profile = session.get(StyleProfileModel, profile_link.profile_id)
+            if profile is None:
+                raise HTTPException(status_code=409, detail="策略来源画像已不可用")
+            # 2026-10-24：本次修改原因：来源样本被优先删除后，旧画像不能继续支持草稿发布。
+            if json.loads(profile.profile_json).get("deleted_sample_ids"):
+                raise HTTPException(status_code=409, detail="画像包含已删除的来源文章，请重新分析后发布策略")
+            # for sample_id in json.loads(row.sample_ids_json):  # 2026-10-23：原仅检查代表文章的逻辑保留供对照。
+            # 2026-10-23：本次修改原因：发布策略前校验画像的完整样本集，而非只校验五篇代表文章。
+            sources = session.scalars(select(StyleProfileArticleModel).where(
+                StyleProfileArticleModel.profile_id == profile.id)).all()
+            if not set(json.loads(row.sample_ids_json)).issubset({item.sample_id for item in sources}):
+                raise HTTPException(status_code=409, detail="策略来源与画像版本不一致")
+            for source in sources:
+                sample_id = source.sample_id
+                sample = session.get(ContentSampleModel, sample_id)
+                metadata = session.get(ArticleMetadataModel, sample_id)
+                if (sample is None or not sample.rights_confirmed or sample.quality_score < 4 or
+                        content_hash(sample.body_text) != source.content_hash or
+                        (metadata and metadata.review_status != "ready") or
+                        sample.platform_id != profile.platform_id or sample.category_id != profile.category_id or
+                        (profile.format_id and sample.format_id != profile.format_id) or
+                        (profile.audience_id and (metadata is None or metadata.audience_id != profile.audience_id))):
+                    raise HTTPException(status_code=409, detail="画像来源文章已变更或不再可用，请重新分析")
         row.status = "published"
         session.commit()
         return strategy_read(row)
@@ -445,6 +509,10 @@ def regenerate_strategy(strategy_id: str, request: StrategyRegenerate) -> Strate
             raise HTTPException(status_code=422, detail="部分所选样本不存在，请刷新样本列表")
         samples = [by_id[sample_id] for sample_id in request.sample_ids]
         for sample in samples:
+            # 2026-10-23：本次修改原因：重新选样提炼也须遵守文章库的核对状态。
+            metadata = session.get(ArticleMetadataModel, sample.id)
+            if metadata and metadata.review_status != "ready":
+                raise HTTPException(status_code=422, detail="所选样本尚未核对或已排除")
             if not sample.rights_confirmed or sample.quality_score < 4:
                 raise HTTPException(status_code=422, detail="只能选择已确认使用权且评分不低于 4 分的样本")
             if sample.platform_id != row.platform_id:
@@ -464,6 +532,10 @@ def regenerate_strategy(strategy_id: str, request: StrategyRegenerate) -> Strate
         # 2026-10-23：本次修改原因：当前规则已改由库内样本生成，旧候选文章引用不再作为依据展示。
         session.execute(delete(ContentStrategyReferenceModel).where(
             ContentStrategyReferenceModel.strategy_id == row.id
+        ))
+        # 2026-10-23：本次修改原因：草稿改用新的样本重新提炼后，不再声称仍依据原风格画像。
+        session.execute(delete(StrategyProfileLinkModel).where(
+            StrategyProfileLinkModel.strategy_id == row.id
         ))
         session.commit()
         return strategy_read(row)

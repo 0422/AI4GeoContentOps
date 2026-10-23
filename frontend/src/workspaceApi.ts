@@ -45,6 +45,9 @@ export interface ContentStrategy {
   created_at: string
   // 2026-10-23：本次修改原因：显示自动提炼策略所依据的文章来源。
   references: { title: string; source_url: string; provider: string }[]
+  // 2026-10-23：本次修改原因：内容策略可显示来自哪一版文章风格画像。
+  profile_id: string | null
+  profile_audience_id: string | null
 }
 
 // 2026-10-23：本次修改原因：品牌库可维护介绍与带出处的关键事实。
@@ -144,14 +147,27 @@ export interface RedFoxCandidate {
   watch_count?: number | string | null
   share_count?: number | string | null
   comment_count?: number | string | null
+  // 2026-10-24：本次修改原因：公众号关键词的收藏/打赏和榜单互动量进入统一候选映射。
+  save_count?: number | string | null
+  reward_count?: number | string | null
+  interactive_count?: number | string | null
+  // 2026-10-24：本次修改原因：候选账号规模可用于预填样本元数据。
+  account_followers?: number | string | null
   category?: string
   growth_rate?: number | string | null
   rank_position?: number | string | null
   work_role?: string
   body_text?: string
+  // 2026-10-24：本次修改原因：保留三种公众号接口的请求参数及原始非正文返回字段。
+  source_data?: { provider: string; method: string; request: Record<string, unknown>;
+    response: Record<string, unknown> }
   // 2026-10-23：本次修改原因：增长榜正文超出样本字段上限时向编辑显示截断状态。
   body_truncated?: boolean
   body_status?: 'rank_content_unverified' | 'detail_required'
+  // 2026-10-23：本次修改原因：跨平台候选标明来源与文章/话题类型，避免把热点直接入库。
+  platform?: string
+  kind?: 'article' | 'topic'
+  collected?: boolean
 }
 
 export interface RedFoxSearchResult {
@@ -163,10 +179,18 @@ export interface RedFoxSearchResult {
   end_date: string | null
   // source: 'quality' | 'hot' // 2026-10-23：原仅支持关键词来源的类型保留供对照。
   // 2026-10-23：本次修改原因：候选结果也可来自三种公众号榜单。
-  source: 'quality' | 'hot' | 'ten_w' | 'original' | 'growth'
+  // source: 'quality' | 'hot' | 'ten_w' | 'original' | 'growth' // 2026-10-23：原公众号来源类型暂留供对照。
+  // 2026-10-23：本次修改原因：发现结果增加跨平台采集方式。
+  source: 'quality' | 'hot' | 'ten_w' | 'original' | 'growth' | 'keyword' | 'dark_horse' | 'daily' | 'weekly' | 'top10' | 'hotspot'
+  platform?: string
   category?: string | null
   rank_date?: string | null
-  total_count?: number
+  // total_count?: number // 2026-10-23：原假定所有接口都知道总数的类型暂留供对照。
+  total_count?: number | null
+  // 2026-10-23：本次修改原因：候选列表按提供商实际数据翻页，未知总数时使用下一页标记。
+  page?: number
+  page_size?: number
+  has_more?: boolean
   // 2026-10-23：本次修改原因：展示 RedFox 已返回但条目不完整的情况。
   warnings?: string[]
   items: RedFoxCandidate[]
@@ -199,6 +223,17 @@ export const getRedFoxWechatRank = (input: {
 }) => request<RedFoxSearchResult>(`/redfox/wechat/rank?${new URLSearchParams(
   Object.entries(input).filter(([, value]) => Boolean(value)) as [string, string][]
 ).toString()}`)
+// 2026-10-23：本次修改原因：平台、采集方式与条件联动后通过统一发现接口查询。
+export const discoverRedFoxCandidates = (input: {
+  platform: string; method: string; keyword?: string; category?: string
+  start_date?: string; end_date?: string; rank_date?: string; hotspot_platform?: string; page?: string
+}) => request<RedFoxSearchResult>(`/redfox/discover?${new URLSearchParams(
+  Object.entries(input).filter(([, value]) => Boolean(value)) as [string, string][]
+).toString()}`)
+// 2026-10-23：本次修改原因：用户点“收录”时才按需读取非公众号作品详情。
+export const getRedFoxCandidateDetail = (input: { platform: string; work_id: string; url?: string }) =>
+  request<{ title: string; body_text: string; body_truncated: boolean; source_url: string }>(
+    '/redfox/discover/detail', json('POST', input))
 export const getRedFoxWechatArticle = (url: string) =>
   request<RedFoxArticle>('/redfox/wechat/article', json('POST', { url }))
 // 2026-10-23：本次修改原因：从候选文章一键生成待审核的写作策略。
@@ -249,9 +284,12 @@ export const deleteStrategy = async (id: string): Promise<void> => {
     throw new Error(body?.detail ?? `删除失败（HTTP ${response.status}）`)
   }
 }
-export const getMatchingStrategy = (platformId: string, categoryId: string, formatId: string) =>
+// export const getMatchingStrategy = (platformId: string, categoryId: string, formatId: string) => // 2026-10-23：原调用签名保留供对照。
+// 2026-10-23：本次修改原因：生成页预览策略时同时传送目标受众，与后端任务校验一致。
+export const getMatchingStrategy = (platformId: string, categoryId: string, formatId: string, audienceId: string) =>
   request<ContentStrategy | null>(
-    `/strategies/match?platform_id=${encodeURIComponent(platformId)}&category_id=${encodeURIComponent(categoryId)}&format_id=${encodeURIComponent(formatId)}`,
+    // `/strategies/match?platform_id=${encodeURIComponent(platformId)}&category_id=${encodeURIComponent(categoryId)}&format_id=${encodeURIComponent(formatId)}`, // 2026-10-23：原查询保留供对照。
+    `/strategies/match?platform_id=${encodeURIComponent(platformId)}&category_id=${encodeURIComponent(categoryId)}&format_id=${encodeURIComponent(formatId)}&audience_id=${encodeURIComponent(audienceId)}`,
   )
 
 export const createWorkspaceTask = (payload: unknown) =>

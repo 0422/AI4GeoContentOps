@@ -35,7 +35,10 @@ def _post(path: str, payload: dict) -> dict:
                 # 2026-10-23：本次修改原因：公众号优质库按 RedFox 官方 SDK 使用 REDFOX_API_KEY 请求头及 source 字段；热门接口保持已验证的请求头。
                 headers={"REDFOX_API_KEY" if path.startswith("/story/api/gzhData/") else "X-API-KEY": key,
                          "Content-Type": "application/json"},
-                json={**payload, "source": "AI4GeoContentOps"} if path.startswith("/story/api/gzhData/") else payload,
+                # json={**payload, "source": "AI4GeoContentOps"} if path.startswith("/story/api/gzhData/") else payload,  # 2026-10-24：原额外请求字段留作对照。
+                # 2026-10-24：本次修改原因：关键词接口只提交文档列出的 keyword、offset 等请求字段。
+                json=payload if path == "/story/api/gzhData/searchArticle" else
+                     {**payload, "source": "AI4GeoContentOps"} if path.startswith("/story/api/gzhData/") else payload,
             )
     except httpx.RequestError as error:
         raise RedFoxError("RedFox 网络请求失败，请稍后重试") from error
@@ -75,7 +78,10 @@ def _rank_request(method: str, path: str, payload: dict, source_name: str) -> di
     key = os.getenv("REDFOX_API_KEY", "").strip()
     if not key:
         raise RedFoxError("请先在 backend/.env 中配置 REDFOX_API_KEY，并重启后端")
-    arguments = {**payload, "source": source_name}
+    # arguments = {**payload, "source": source_name}  # 2026-10-24：原统一追加 source 字段留作对照。
+    # 2026-10-24：本次修改原因：两种公众号榜单只发送文档要求的 type/startDate/endDate。
+    arguments = payload if path in {"/story/api/cozeSkill/getTenWReadingRank",
+                                    "/story/api/cozeSkill/getOriginalRank"} else {**payload, "source": source_name}
     try:
         with httpx.Client(timeout=30.0) as client:
             response = client.request(
@@ -140,20 +146,41 @@ def _rank_request(method: str, path: str, payload: dict, source_name: str) -> di
     return data
 
 
+# 2026-10-24：本次修改原因：三种公众号接口的原始非正文返回字段统一保存，供样本详情核对来源。
+_WECHAT_FIELDS = (
+    "accountId", "accountType", "author", "collectCount", "commentCount", "coverUrl",
+    "fans", "interactiveCount", "isOriginal", "likeCount", "memo", "orderNum",
+    "originalAuthor", "originalFlag", "oriUrl", "photoId", "publishLocation",
+    "publishTime", "publicTime", "readCount", "clicksCount", "rewardCount",
+    "shareCount", "sourceUrl", "summary", "syncTime", "thumbnail", "title", "type",
+    "userHeadUrl", "userName", "watchCount", "workUrl", "workUuid",
+)
+
+
+def _wechat_source_data(article: dict, method: str, request: dict) -> dict:
+    return {"provider": "RedFox", "method": method, "request": request,
+            "response": {key: article[key] for key in _WECHAT_FIELDS if key in article}}
+
+
 # 2026-10-23：本次修改原因：仅把榜单明示的阅读、互动指标及来源转换为候选卡片，缺失字段保持为空而不伪造为 0。
 def _rank_candidate(article: dict, source: str, index: int, *, account: dict | None = None,
-                    role: str = "") -> dict:
+                    role: str = "", request: dict | None = None) -> dict:
     account = account or {}
     url = article.get("oriUrl") or article.get("workUrl") or article.get("url") or ""
     url = url if isinstance(url, str) and urlparse(url).scheme == "https" and urlparse(url).hostname == "mp.weixin.qq.com" else ""
     title = str(article.get("title") or "")[:300]
-    summary = str(article.get("summary") or article.get("content") or "")[:500]
+    # summary = str(article.get("summary") or article.get("content") or "")[:500]  # 2026-10-24：原将正文降格为摘要的映射留作对照。
+    # 2026-10-24：本次修改原因：榜单 summary 与 content 分别对应摘要和正文。
+    summary = str(article.get("summary") or "")[:500]
     content = article.get("content")
-    # 2026-10-23：本次修改原因：增长榜文档将 content 标为原文；只把足够长的文本作为待核对正文，其余两榜的 content 仍按摘要处理。
-    body_text = _article_text(content) if source == "growth" and isinstance(content, str) else ""
+    # body_text = _article_text(content) if source == "growth" and isinstance(content, str) else ""  # 2026-10-24：原仅增长榜提取 content 的逻辑留作对照。
+    # 2026-10-24：本次修改原因：10W+ 和原创榜文档明确 content 是正文，先清理再供用户核对。
+    body_text = _article_text(content) if isinstance(content, str) else ""
     # 2026-10-23：本次修改原因：样本正文上限为 30000 字，增长榜内容截断时向界面显式说明。
     body_truncated = len(body_text) > 30000
-    body_text = body_text[:30000] if len(body_text) >= 200 else ""
+    # body_text = body_text[:30000] if len(body_text) >= 200 else ""  # 2026-10-24：原 200 字门槛留作对照。
+    # 2026-10-24：本次修改原因：入库正文最低 50 字，采集阶段保持相同标准。
+    body_text = body_text[:30000] if len(body_text) >= 50 else ""
     return {
         "id": str(article.get("photoId") or article.get("workUuid") or url or f"{source}-{index}"),
         "title": title, "summary": summary,
@@ -162,6 +189,13 @@ def _rank_candidate(article: dict, source: str, index: int, *, account: dict | N
         "read_count": article.get("clicksCount", article.get("readCount")),
         "like_count": article.get("likeCount"), "watch_count": article.get("watchCount"),
         "share_count": article.get("shareCount"), "comment_count": article.get("commentCount"),
+        # 2026-10-24：本次修改原因：榜单若提供账号规模，随候选传给录入弹窗。
+        # "account_followers": (article.get("fansCount") or article.get("followerCount") or account.get("fansCount") or account.get("followerCount")),  # 2026-10-24：原未读取文档 fans 字段的映射留作对照。
+        # 2026-10-24：本次修改原因：公众号榜单粉丝数实际字段为 fans，空值保持为空。
+        "account_followers": article.get("fans") if article.get("fans") is not None else account.get("fans"),
+        "save_count": article.get("collectCount"), "reward_count": article.get("rewardCount"),
+        "interactive_count": article.get("interactiveCount"),
+        "source_data": _wechat_source_data(article, source, request or {}),
         "category": str(article.get("type") or ""), "growth_rate": account.get("growthRate"),
         "rank_position": account.get("rankPosition", article.get("orderNum")),
         "work_role": role, "body_text": body_text, "body_truncated": body_truncated,
@@ -170,8 +204,10 @@ def _rank_candidate(article: dict, source: str, index: int, *, account: dict | N
 
 
 # 2026-10-23：本次修改原因：提供 10W+、原创爆款和阅读增长三种榜单采集入口，并保留各榜单不同的参数与返回形状。
+# 2026-10-23：本次修改原因：发现页分页需要保留榜单完整结果，旧接口仍默认取前 20 条。
 def get_wechat_rank(source: str, *, category: str | None = None, start_date: date | None = None,
-                    end_date: date | None = None, rank_date: date | None = None) -> dict:
+                    end_date: date | None = None, rank_date: date | None = None,
+                    limit: int | None = 20) -> dict:
     if source in {"ten_w", "original"}:
         if not category or not start_date or not end_date:
             raise RedFoxError("请选择榜单类目、开始日期和结束日期")
@@ -181,9 +217,9 @@ def get_wechat_rank(source: str, *, category: str | None = None, start_date: dat
                 else "/story/api/cozeSkill/getOriginalRank")
         source_name = ("公众号 10W+ 阅读文章推荐-SDK" if source == "ten_w"
                        else "公众号原创爆款文章推荐-SDK")
-        data = _rank_request("POST", path, {
-            "type": category, "startDate": start_date.isoformat(), "endDate": end_date.isoformat(),
-        }, source_name)
+        # 2026-10-24：本次修改原因：保存与实际请求完全一致的榜单筛选条件。
+        request = {"type": category, "startDate": start_date.isoformat(), "endDate": end_date.isoformat()}
+        data = _rank_request("POST", path, request, source_name)
         field = "tenWReadingRank" if source == "ten_w" else "originalRank"
         if isinstance(data, list):
             rows = data
@@ -192,13 +228,15 @@ def get_wechat_rank(source: str, *, category: str | None = None, start_date: dat
                          if isinstance(data.get(name), list)), None)
         if rows is None:
             raise RedFoxError(f"RedFox 返回成功状态，但缺少 {field} 文章列表；请核对接口字段")
-        items = [_rank_candidate(row, source, index) for index, row in enumerate(rows[:20], 1)
+        # items = [_rank_candidate(row, source, index) for index, row in enumerate(rows[:20], 1)  # 2026-10-23：原固定截断暂留供对照。
+        items = [_rank_candidate(row, source, index, request=request) for index, row in enumerate(rows[:limit], 1)
                  if isinstance(row, dict)]
         # 2026-10-23：本次修改原因：将部分损坏的榜单条目与真正的空榜单区分提示。
         if rows and not items:
             raise RedFoxError("RedFox 返回了榜单条目，但条目不是文章对象；请核对接口字段")
-        warnings = ([f"榜单前 20 条中有 {len(rows[:20]) - len(items)} 条格式异常，未显示。"]
-                    if len(items) < len(rows[:20]) else [])
+        # warnings = ([f"榜单前 20 条中有 {len(rows[:20]) - len(items)} 条格式异常，未显示。"] if len(items) < len(rows[:20]) else [])  # 2026-10-23：原固定 20 条提示暂留供对照。
+        warnings = ([f"榜单中有 {len(rows[:limit]) - len(items)} 条格式异常，未显示。"]
+                    if len(items) < len(rows[:limit]) else [])
         return {"source": source, "keyword": "", "category": category,
                 "start_date": start_date.isoformat(), "end_date": end_date.isoformat(),
                 "rank_date": None, "total_count": len(rows), "items": items, "warnings": warnings}
@@ -284,38 +322,61 @@ def search_wechat_hot_articles(keyword: str) -> dict:
 
 
 # 2026-10-23：本次修改原因：优先从与 queryArticleDetail 同属公众号优质库的搜索接口获取候选。
-def search_wechat_quality_articles(keyword: str) -> dict:
+# 2026-10-23：本次修改原因：公众号关键词搜索按页传递偏移量，不再只返回首批十篇。
+def search_wechat_quality_articles(keyword: str, *, offset: int = 0, limit: int = 10) -> dict:
     # data = _post("/story/api/gzhData/searchArticle", {"keyword": keyword, "offset": 0, "sortType": "_4"})  # 2026-10-23：原附加排序参数暂留供对照。
     # 2026-10-23：本次修改原因：先按官方 SDK 的最小参数调用，减少不同账户/版本的参数兼容风险。
-    data = _post("/story/api/gzhData/searchArticle", {"keyword": keyword, "offset": 0})
+    # data = _post("/story/api/gzhData/searchArticle", {"keyword": keyword, "offset": 0})  # 2026-10-23：原第一页固定偏移暂留供对照。
+    # 2026-10-24：本次修改原因：关键词接口的偏移和关键字按文档提交，并保存本次查询条件。
+    request = {"keyword": keyword, "offset": offset}
+    data = _post("/story/api/gzhData/searchArticle", request)
     articles = data.get("list")
     if not isinstance(articles, list):
         articles = data.get("articles")
     if not isinstance(articles, list):
         raise RedFoxError("RedFox 优质库搜索返回结构已变化：缺少文章列表")
     items = []
-    for article in articles[:20]:
+    # for article in articles[:limit]:  # 2026-10-24：原十条截断留作对照。
+    # 2026-10-24：本次修改原因：上游每次按 20 条取，页面再切成两个十条页。
+    for index, article in enumerate(articles[:limit], 1):
         if not isinstance(article, dict):
             continue
         url = article.get("workUrl") or article.get("url") or ""
-        if not isinstance(url, str):
-            continue
-        parsed = urlparse(url)
-        if parsed.scheme != "https" or parsed.hostname != "mp.weixin.qq.com":
-            continue
+        # if not isinstance(url, str): continue  # 2026-10-24：原缺链接时直接丢弃候选的逻辑留作对照。
+        # 2026-10-24：本次修改原因：链接缺失的文章仍可手工核对；不安全的链接不用于自动取文。
+        parsed = urlparse(url) if isinstance(url, str) else None
+        url = url if parsed and parsed.scheme == "https" and parsed.hostname == "mp.weixin.qq.com" else ""
+        content = article.get("content")
+        body = _article_text(content) if isinstance(content, str) else ""
         items.append({
-            "id": str(article.get("workUuid") or article.get("id") or url),
+            "id": str(article.get("workUuid") or article.get("id") or url or f"keyword-{offset}-{index}"),
             "title": str(article.get("title") or "未命名文章")[:300],
             "summary": str(article.get("summary") or article.get("description") or "")[:500],
             "author": str(article.get("author") or article.get("accountName") or ""),
             "url": url,
             "published_at": str(article.get("publishTime") or article.get("publicTime") or ""),
             "read_count": article.get("readCount", article.get("clicksCount")),
+            # 2026-10-24：本次修改原因：关键词接口返回的互动项和正文全部进入统一候选对象。
+            "like_count": article.get("likeCount"), "watch_count": article.get("watchCount"),
+            "comment_count": article.get("commentCount"), "share_count": article.get("shareCount"),
+            "save_count": article.get("collectCount"), "reward_count": article.get("rewardCount"),
+            "interactive_count": article.get("interactiveCount"),
+            "body_text": body[:30000] if len(body) >= 50 else "",
+            "body_truncated": len(body) > 30000,
+            "body_status": "rank_content_unverified" if len(body) >= 50 else "detail_required",
+            "source_data": _wechat_source_data(article, "keyword", request),
         })
-        if len(items) >= 10:
+        # if len(items) >= 10:  # 2026-10-23：原首批固定十篇暂留供对照。
+        if len(items) >= limit:
             break
+    # return {"keyword": keyword, "start_date": None, "end_date": None, "source": "quality", "items": items,
+    #         "has_more": len(articles) >= limit}  # 2026-10-24：原以本地截断数猜测下一页的逻辑留作对照。
+    # 2026-10-24：本次修改原因：优先使用接口返回的 hasMore/total，避免十条视图与二十条上游分页混淆。
+    total = data.get("total")
     return {"keyword": keyword, "start_date": None, "end_date": None,
-            "source": "quality", "items": items}
+            "source": "quality", "items": items,
+            "total_count": total if isinstance(total, int) and total >= 0 else None,
+            "has_more": bool(data["hasMore"]) if "hasMore" in data else len(articles) >= limit}
 
 
 class _PlainText(HTMLParser):

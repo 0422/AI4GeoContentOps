@@ -65,6 +65,16 @@ export default function StrategiesPage({ options }: { options: ContentOption[] }
       setError(reason instanceof Error ? reason.message : '样本读取失败'))
   }, [])
 
+  // 2026-10-23：本次修改原因：从画像或文章详情进入策略页时直接选中新建或被引用的版本。
+  useEffect(() => {
+    const pending = sessionStorage.getItem('ai4geo.openStrategyId')
+    if (!pending) return
+    const match = strategies.find((item) => item.id === pending)
+    if (!match) return
+    sessionStorage.removeItem('ai4geo.openStrategyId')
+    useStrategy(match)
+  }, [strategies])
+
   // 2026-10-23：本次修改原因：样本库候选进入本页后再按需获取全文、提炼策略。
   useEffect(() => {
     const pending = sessionStorage.getItem('ai4geo.strategyCandidate')
@@ -408,8 +418,14 @@ export default function StrategiesPage({ options }: { options: ContentOption[] }
         {/* 2026-10-23：本次修改原因：显示自动分析的文章来源，方便审核者回看原文。 */}
         {/* {selected && <p className="subtle">来源样本 {selected.sample_ids.length} 篇 · 自动分析文章 {selected.references.length} 篇 · 创建于 {new Date(selected.created_at).toLocaleString('zh-CN')}</p>} 2026-10-23：原重复元数据保留供对照，列表与来源展开区已提供所需信息。 */}
         {/* 2026-10-23：本次修改原因：来源清单改为按需展开，复杂策略表单默认聚焦规则内容。 */}
-        {selected && (selected.sample_ids.length > 0 || selected.references.length > 0) && <details className="referenceDetails">
+        {/* 2026-10-23：本次修改原因：策略审核可直接打开上游画像版本和来源样本。 */}
+        {selected && (selected.profile_id || selected.sample_ids.length > 0 || selected.references.length > 0) && <details className="referenceDetails">
           <summary>查看参考来源（{selected.sample_ids.length + selected.references.length}）</summary>
+        {selected.profile_id && <div className="strategyReferences"><strong>风格画像</strong>
+          <button type="button" className="textButton" onClick={() => {
+            sessionStorage.setItem('ai4geo.openProfileId', selected.profile_id || '')
+            window.location.hash = '#/samples'
+          }}>打开来源画像 ↗</button></div>}
         {/* 2026-10-23：本次修改原因：编辑区列出当前版本引用的样本，便于检查重提炼依据。 */}
         {selected && selected.sample_ids.length > 0 && <div className="strategyReferences">
           <strong>当前版本参考样本</strong>{selected.sample_ids.map((id) =>

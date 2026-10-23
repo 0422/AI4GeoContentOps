@@ -14,14 +14,45 @@ button:disabled { opacity: .52; }
 .brand { gap: 10px; padding: 2px 12px 26px; color: var(--color-text); }
 .brandMark { width: 34px; height: 34px; border-radius: 7px; background: var(--color-accent); color: var(--color-on-accent); font-size: 17px; box-shadow: none; }
 .brand strong { font-size: 16px; font-weight: 700; }
-.brand small, .navCaption, .navSymbol, .navWords small, .sidebarFoot, .topbar, .kicker, .headingIndex { display: none; }
+/* .brand small, .navCaption, .navSymbol, .navWords small, .sidebarFoot, .topbar, .kicker, .headingIndex { display: none; } 2026-10-23：原隐藏导航图标规则留作对照。 */
+/* 2026-10-23：本次修改原因：恢复功能图标，其余非必要的辅助文字仍保持隐藏。 */
+.brand small, .navCaption, .navWords small, .sidebarFoot, .topbar, .kicker, .headingIndex { display: none; }
+.navSymbol { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 0;
+  background: transparent; color: currentColor; }
+.navItem.active .navSymbol { color: currentColor; background: transparent; }
+/* 2026-10-23：本次修改原因：侧栏顶部容纳品牌与收起按钮，窄侧栏只保留导航图标。 */
+.sidebarHeader { display: flex; align-items: flex-start; justify-content: space-between; gap: 4px; margin: 0 4px 18px; }
+.sidebarHeader .brand { min-width: 0; padding: 2px 0; }
+.brandText { min-width: 0; }
+/* .sidebarToggle { display: grid; place-items: center; width: 30px; height: 30px; flex: none;
+  border: var(--border-ui); border-radius: var(--radius-control); background: var(--color-surface);
+  color: var(--color-text-secondary); cursor: pointer; }
+.sidebarToggle:hover { color: var(--color-accent); background: var(--color-surface-hover); } 2026-10-24：原边框和底色按钮样式留作对照。 */
+/* 2026-10-24：本次修改原因：收展图标保持无底色，仅在悬停时用与导航入口一致的阴影提示可点击。 */
+.sidebarToggle { display: grid; place-items: center; width: 40px; height: 40px; flex: none;
+  border: 0; border-radius: var(--radius-control); background: transparent;
+  color: var(--color-text-secondary); cursor: pointer;
+  transition: color var(--motion-fast), box-shadow var(--motion-fast); }
+.sidebarToggle:hover { color: var(--color-accent); box-shadow: 0 3px 12px #1e392f24; }
+.sidebar.isCollapsed { flex-basis: 68px; padding-right: 9px; padding-left: 9px; }
+/* .sidebar.isCollapsed .sidebarHeader { position: relative; display: grid; justify-items: center; margin: 0 0 18px; padding-top: 34px; } .sidebar.isCollapsed .sidebarToggle { position: absolute; top: 0; right: 0; } 2026-10-23：原收起后保留品牌标记的布局留作对照。 */
+/* 2026-10-23：本次修改原因：收起时只保留展开按钮和功能入口图标。 */
+/* .sidebar.isCollapsed .sidebarHeader { justify-content: flex-end; margin: 0 0 18px; } 2026-10-24：原右对齐方式留作对照。 */
+/* 2026-10-24：本次修改原因：收起后让展开图标与下方导航图标位于同一条中心线。 */
+.sidebar.isCollapsed .sidebarHeader { justify-content: center; margin: 0 0 18px; }
+.sidebar.isCollapsed .brand, .sidebar.isCollapsed .navWords { display: none; }
+.sidebar.isCollapsed .navItem { justify-content: center; padding-right: 8px; padding-left: 8px; }
 .sideNav { gap: 3px; }
 .navItem {
   min-height: 40px; padding: 8px 12px; border: 0; border-radius: var(--radius-control);
   color: var(--color-text-secondary); transition: color var(--motion-fast), background var(--motion-fast);
 }
 .navItem:hover { color: var(--color-text); background: var(--color-surface-hover); }
+/* 2026-10-24：本次修改原因：导航入口与侧栏收展图标使用相同悬停阴影。 */
+.navItem:hover:not(.active) { box-shadow: 0 3px 12px #1e392f24; }
 .navItem.active { color: var(--color-accent); background: var(--color-accent-surface); box-shadow: none; }
+/* 2026-10-24：本次修改原因：当前选中的导航入口悬停时也与收展图标保持一致的阴影反馈。 */
+.navItem.active:hover { box-shadow: 0 3px 12px #1e392f24; }
 .navWords strong { font-size: 14px; font-weight: 600; }
 .pageContent { max-width: 1420px; padding: 32px 38px 72px; }
 .pageHeading { align-items: center; margin-bottom: 22px; }
@@ -166,6 +197,9 @@ button:disabled { opacity: .52; }
   .sideNav { gap: 4px; }
   .navItem { min-height: 38px; }
   .pageContent { padding: 28px 24px 56px; }
+  /* 2026-10-23：本次修改原因：顶部横向导航也遵循图标收起状态，不挤压页面宽度。 */
+  .sidebar.isCollapsed { width: 100%; flex-basis: auto; }
+  .sidebar.isCollapsed .sidebarHeader { justify-content: flex-end; align-items: center; }
 }
 @media (max-width: 680px) {
   .pageContent { padding: 22px 14px 48px; }

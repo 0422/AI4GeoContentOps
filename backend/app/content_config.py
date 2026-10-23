@@ -1,5 +1,7 @@
 # 2026-10-23：本次修改原因：集中管理用户指定的四组可编辑内容选项和历史任务快照。
 from sqlalchemy import select
+# 2026-10-23：本次修改原因：为已初始化的内容选项补入知乎平台时使用不会冲突的 ID。
+from uuid import uuid4
 from sqlalchemy.orm import Session
 
 from app.db import ContentOptionModel
@@ -15,7 +17,9 @@ DEFAULT_OPTIONS = {
     ],
     "audience": ["学生", "职场新人", "资深从业者", "管理者", "家庭决策者", "泛兴趣人群"],
     "format": ["资讯", "科普", "评论", "故事", "清单", "测评", "访谈"],
-    "platform": ["微信公众号", "小红书", "百家号", "头条", "视频号"],
+    # "platform": ["微信公众号", "小红书", "百家号", "头条", "视频号"],  # 2026-10-23：原平台列表暂留供对照。
+    # 2026-10-23：本次修改原因：知乎候选录入时需要可选的实际来源平台。
+    "platform": ["微信公众号", "小红书", "百家号", "头条", "视频号", "知乎"],
 }
 
 
@@ -27,6 +31,13 @@ def seed_options(session: Session) -> None:
                 session.add(ContentOptionModel(
                     id=f"{kind}_{position:02d}", kind=kind, label=label, position=position, active=True
                 ))
+        # 2026-10-23：本次修改原因：旧数据库已有平台选项时也补入知乎，不覆盖用户编辑过的其他项。
+        if kind == "platform" and exists is not None:
+            current = session.scalars(select(ContentOptionModel).where(ContentOptionModel.kind == "platform")).all()
+            if not any(item.label == "知乎" for item in current):
+                session.add(ContentOptionModel(id=f"platform_{uuid4().hex[:12]}", kind="platform",
+                                               label="知乎", position=max(item.position for item in current) + 1,
+                                               active=True))
     session.commit()
 
 

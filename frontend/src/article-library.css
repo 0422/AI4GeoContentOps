@@ -1,0 +1,335 @@
+/* 2026-10-23：本次修改原因：文章库延用工作台主题，以筛选列表和阅读详情组织日常核对工作。 */
+.articleLibraryPage { display: grid; gap: 18px; min-width: 0; }
+.libraryTop, .libraryTopActions, .librarySectionHead, .libraryPager, .libraryProfileActions {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+}
+/* .libraryTop h1 { margin: 0 0 5px; color: var(--color-text); font-size: 25px; } 2026-10-23：原重复模块标题样式保留供对照。 */
+/* 2026-10-23：本次修改原因：侧栏已经标出模块，页面主标题只保留给读屏器。 */
+/* .libraryTop h1 { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; } 2026-10-23：原页眉隐藏标题样式留作对照。 */
+/* 2026-10-23：本次修改原因：移除页眉布局后，仍保留文章库页面的读屏器标题。 */
+.libraryScreenReaderTitle { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+.libraryTop p { margin: 0; color: var(--color-text-secondary); font-size: 13px; }
+.libraryNotice { margin: 0; padding: 10px 12px; border-left: 3px solid var(--color-accent);
+  background: var(--color-surface-muted); color: var(--color-text-secondary); font-size: 13px; }
+.libraryTopActions { justify-content: flex-end; flex-wrap: wrap; }
+.libraryTabs { display: flex; gap: 20px; border-bottom: var(--border-ui); overflow-x: auto; }
+.libraryTabs button { padding: 11px 2px; border: 0; border-bottom: 2px solid transparent; background: none;
+  color: var(--color-text-secondary); font-size: 14px; white-space: nowrap; cursor: pointer; }
+.libraryTabs button.active { border-bottom-color: var(--color-accent); color: var(--color-accent); font-weight: 650; }
+/* .librarySummary { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 1px; overflow: hidden; border: var(--border-ui); border-radius: var(--radius-panel); background: var(--color-border); } 2026-10-23：原整条等分概况区留作对照。 */
+/* .librarySummary div { display: grid; gap: 4px; padding: 17px 20px; background: var(--color-surface); } 2026-10-23：原无间距单元留作对照。 */
+/* 2026-10-23：本次修改原因：概况卡片限制总宽度，缩短高度并在卡片之间留出清晰间距。 */
+.librarySummary { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px;
+  width: min(100%, 900px); }
+.librarySummary div { display: grid; align-content: center; gap: 4px; min-height: 84px; padding: 12px 16px;
+  border: var(--border-ui); border-radius: var(--radius-panel); background: var(--color-surface); }
+.librarySummary strong { color: var(--color-text); font-size: 22px; line-height: 1.15; }
+.librarySummary span { color: var(--color-text-muted); font-size: 13px; }
+/* .libraryFilterBar { display: flex; align-items: end; gap: 10px; flex-wrap: wrap; } 2026-10-23：原筛选与搜索混排样式留作对照。 */
+/* 2026-10-23：本次修改原因：筛选项保持标签在左、下拉框在右，搜索独占下一行。 */
+.libraryFilterBar { display: grid; gap: 12px; }
+.libraryFilterControls { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; }
+.libraryFilterControls label { display: flex; align-items: center; gap: 8px; white-space: nowrap;
+  color: var(--color-text-secondary); font-size: 14px; font-weight: 600; }
+.libraryEditForm label, .libraryMetricForm label { display: grid; gap: 6px;
+  color: var(--color-text-secondary); font-size: 12px; font-weight: 600; }
+.libraryFilterBar select, .libraryFilterBar input, .libraryEditForm input, .libraryEditForm select,
+.libraryEditForm textarea, .libraryMetricForm input { min-height: 40px; padding: 9px 11px;
+  border: var(--border-ui); border-radius: var(--radius-control); background: var(--color-surface);
+  color: var(--color-text); font: inherit; }
+.libraryFilterBar select { min-width: 126px; }
+/* .librarySearch { flex: 1 1 220px; } .librarySearch input { width: 100%; } 2026-10-23：原随筛选项换行的搜索样式留作对照。 */
+.librarySearchRow { display: flex; align-items: center; gap: 10px; width: 100%; max-width: 620px; }
+.librarySearchRow input { flex: 1 1 auto; min-width: 0; }
+.librarySearchRow button { flex: none; min-height: 40px; }
+.libraryWorkArea { display: grid; grid-template-columns: minmax(320px, .85fr) minmax(0, 1.15fr); gap: 18px; align-items: start; }
+.libraryArticleList, .libraryArticleDetail { min-width: 0; padding: 22px; border: var(--border-ui);
+  border-radius: var(--radius-panel); background: var(--color-surface); }
+.librarySectionHead { margin-bottom: 14px; align-items: start; }
+.librarySectionHead h2 { margin: 0; color: var(--color-text); font-size: 16px; line-height: 1.4; }
+.librarySectionHead span { color: var(--color-text-muted); font-size: 12px; white-space: nowrap; }
+/* 2026-10-24：本次修改原因：文章标题与编辑、删除操作在窄屏也能清楚排列。 */
+.libraryArticleDetail .librarySectionHead { flex-wrap: wrap; }
+.libraryArticleDetail .librarySectionHead h2 { min-width: 0; overflow-wrap: anywhere; }
+.libraryArticleActions { display: flex; flex-wrap: wrap; gap: 8px; }
+.libraryArticleRow, .libraryProfileList button { display: grid; width: 100%; gap: 5px; padding: 14px 10px;
+  border: 0; border-bottom: var(--border-ui); background: transparent; text-align: left; cursor: pointer; }
+.libraryArticleRow:hover, .libraryProfileList button:hover { background: var(--color-surface-hover); }
+.libraryArticleRow.selected, .libraryProfileList button.selected { background: var(--color-accent-surface); }
+.libraryArticleRow strong, .libraryProfileList strong { color: var(--color-text); font-size: 14px; line-height: 1.45; }
+.libraryArticleRow span, .libraryProfileList span, .libraryArticleRow small { color: var(--color-text-muted); font-size: 12px; }
+.libraryPager { justify-content: center; margin-top: 18px; color: var(--color-text-muted); font-size: 12px; }
+.libraryMeta { margin: 10px 0; color: var(--color-text-secondary); font-size: 12px; line-height: 1.6; }
+.libraryMeta a { color: var(--color-accent); }
+/* 2026-10-23：本次修改原因：传播表现只在有可比样本时显示分组，未分组原因同样保持可见。 */
+.libraryPerformance { padding: 10px 12px; border-radius: var(--radius-control);
+  background: var(--color-surface-muted); color: var(--color-text-secondary); font-size: 12px; line-height: 1.6; }
+.libraryArticleDetail details { margin-top: 18px; padding-top: 13px; border-top: var(--border-ui); }
+.libraryArticleDetail summary { color: var(--color-text); font-size: 14px; font-weight: 650; cursor: pointer; }
+.libraryBody { max-height: 460px; overflow: auto; padding: 14px 2px; color: var(--color-text);
+  white-space: pre-wrap; overflow-wrap: anywhere; font-size: 14px; line-height: 1.8; }
+.libraryFeatures { display: grid; gap: 10px; margin-top: 12px; }
+.libraryFeatures > div { display: grid; gap: 4px; }
+.libraryFeatures strong { font-size: 12px; }
+.libraryFeatures code { padding: 9px; border-radius: var(--radius-control); background: var(--color-surface-muted);
+  color: var(--color-text-secondary); white-space: pre-wrap; overflow-wrap: anywhere; font-size: 12px; }
+.libraryEditForm { display: grid; gap: 14px; }
+.libraryEditForm input, .libraryEditForm select, .libraryEditForm textarea { width: 100%; }
+.libraryEditForm textarea { resize: vertical; line-height: 1.6; }
+.libraryFieldPair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.libraryEditForm .libraryCheck { display: flex; align-items: start; gap: 8px; line-height: 1.5; }
+.libraryCheck input { width: auto; min-height: auto; accent-color: var(--color-accent); }
+.libraryMetricRow { display: grid; gap: 5px; padding: 12px 0; border-bottom: var(--border-ui);
+  color: var(--color-text-secondary); font-size: 12px; }
+.libraryMetricRow strong { color: var(--color-text); }
+.libraryMetricRow small { color: var(--color-text-muted); }
+.libraryMetricForm { display: grid; gap: 12px; margin-top: 16px; }
+.libraryMetricForm h3 { margin: 0; font-size: 13px; }
+.libraryMetricInputs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.libraryMetricInputs input { width: 100%; }
+.libraryProfileArea { display: grid; grid-template-columns: minmax(280px, .7fr) minmax(0, 1.3fr); gap: 18px; align-items: start; }
+.libraryProfileList { border-top: var(--border-ui); }
+.libraryProfileDetail { margin-top: 22px; padding-top: 20px; border-top: var(--border-ui); }
+.libraryProfileDetail h3 { margin: 0 0 8px; font-size: 17px; }
+.libraryStatistics { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1px;
+  margin: 18px 0; border: var(--border-ui); background: var(--color-border); }
+.libraryStatistics > div { display: grid; gap: 3px; padding: 12px; background: var(--color-surface); }
+.libraryStatistics span, .libraryStatistics small { color: var(--color-text-muted); font-size: 12px; }
+.libraryStatistics strong { color: var(--color-text); font-size: 18px; }
+.librarySemantic { border-top: var(--border-ui); padding-top: 12px; }
+.librarySemantic h4 { margin: 0; font-size: 13px; }
+.librarySemantic p { margin: 10px 0; color: var(--color-text-secondary); font-size: 13px; line-height: 1.6; }
+.libraryProfileActions { justify-content: flex-start; flex-wrap: wrap; margin-top: 15px; }
+.libraryProfileActions span { color: var(--color-text-muted); font-size: 12px; }
+/* 2026-10-23：本次修改原因：来源文章、画像与策略之间的跳转就地展示，便于审核依据。 */
+.libraryRelations { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-top: 15px;
+  padding-top: 12px; border-top: var(--border-ui); color: var(--color-text-secondary); font-size: 12px; }
+.libraryRelations strong { margin-right: 4px; color: var(--color-text); }
+.libraryRelations .textButton { display: inline-flex; align-items: center; min-height: 32px; padding: 4px 8px;
+  border: var(--border-ui); border-radius: var(--radius-control); text-decoration: none; }
+/* 2026-10-23：本次修改原因：分析运行记录紧邻发起入口，失败原因不被隐藏在接口日志中。 */
+.libraryRuns { margin-top: 22px; padding-top: 14px; border-top: var(--border-ui); }
+.libraryRuns h3 { margin: 0 0 8px; font-size: 13px; }
+.libraryRuns > div { display: grid; gap: 3px; padding: 9px 0; border-bottom: var(--border-ui); font-size: 12px; }
+.libraryRuns span, .libraryRuns small { color: var(--color-text-muted); }
+/* 2026-10-23：本次修改原因：候选已有的互动读数在录入时就地核对，空值不显示为零。 */
+.sampleMetricFields { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.sampleMetricFields p { grid-column: 1 / -1; margin: 0; color: var(--color-text); font-size: 13px; font-weight: 650; }
+.sampleMetricFields small { color: var(--color-text-muted); font-weight: 400; }
+
+/* 2026-10-23：本次修改原因：手动录入紧邻查询按钮，候选整行双击时提供清晰的悬停与键盘焦点反馈。 */
+.libraryDiscoveryActions { display: flex; flex: 0 0 auto; align-items: center; gap: 10px; }
+.articleLibraryPage .redfoxCollectForm .secondaryButton { flex: 0 0 auto; min-height: 43px; }
+.articleLibraryPage .redfoxItem { cursor: pointer; }
+.articleLibraryPage .redfoxItem:hover { background: var(--color-surface-hover); }
+.articleLibraryPage .redfoxItem:focus-visible { outline: 2px solid var(--color-accent); outline-offset: -2px; }
+/* 2026-10-23：本次修改原因：热点条目只供查看选题，鼠标样式不暗示可双击录入。 */
+.articleLibraryPage .redfoxItem.redfoxTopic, .articleLibraryPage .redfoxItem.redfoxCollected { cursor: default; }
+/* 2026-10-24：本次修改原因：候选标题与操作同行，指标与账号时间同行，摘要和全文状态同行，缩短条目高度。 */
+/* .articleLibraryPage .redfoxItem { display: grid; grid-template-columns: minmax(0, 1fr) auto; } 2026-10-24：原双列候选布局留作对照。 */
+/* 2026-10-24：本次修改原因：候选左侧给复选框固定宽度，不压缩标题和右侧操作。 */
+.articleLibraryPage .redfoxItem { display: grid; grid-template-columns: 26px minmax(0, 1fr) auto;
+  align-items: center; column-gap: 18px; row-gap: 6px; padding: 12px 0; }
+/* .articleLibraryPage .redfoxItemHead { grid-column: 1; grid-row: 1; min-width: 0; align-items: center; } 2026-10-24：原标题网格位置留作对照。 */
+.articleLibraryPage .redfoxItemHead { grid-column: 2; grid-row: 1; min-width: 0; align-items: center; gap: 10px; }
+.articleLibraryPage .redfoxItemHead h3 { min-width: 0; }
+/* .articleLibraryPage .redfoxMetrics { grid-column: 1; grid-row: 2; margin: 0; } 2026-10-24：原指标网格位置留作对照。 */
+.articleLibraryPage .redfoxMetrics { grid-column: 2; grid-row: 2; margin: 0; }
+.articleLibraryPage .redfoxMetrics span { font-size: 13px; }
+.articleLibraryPage .redfoxItemFoot { display: contents; }
+/* .articleLibraryPage .redfoxItemFoot > div { grid-column: 2; grid-row: 1; justify-self: end; } 2026-10-24：原右侧操作位置留作对照。 */
+.articleLibraryPage .redfoxItemFoot > div { grid-column: 3; grid-row: 1; justify-self: end; }
+/* .articleLibraryPage .redfoxItemFoot > span { grid-column: 2; grid-row: 2; justify-self: end; } 2026-10-24：原来源信息位置留作对照。 */
+.articleLibraryPage .redfoxItemFoot > span { grid-column: 3; grid-row: 2; justify-self: end;
+  color: var(--color-text-secondary); font-size: 13px; white-space: nowrap; }
+/* .articleLibraryPage .redfoxItem > p { grid-column: 1; grid-row: 3; margin: 0; font-size: 14px; } 2026-10-24：原摘要位置留作对照。 */
+.articleLibraryPage .redfoxItem > p { grid-column: 2; grid-row: 3; margin: 0; font-size: 14px; }
+/* .articleLibraryPage .redfoxItem > .redfoxAvailability { grid-column: 2; grid-row: 3; } 2026-10-24：原正文状态位置留作对照。 */
+.articleLibraryPage .redfoxItem > .redfoxAvailability { grid-column: 3; grid-row: 3;
+  justify-self: end; margin: 0; font-size: 13px; white-space: nowrap; }
+/* .articleLibraryPage .redfoxItem > .redfoxAvailability:only-of-type { grid-column: 1 / -1; justify-self: start; } 2026-10-24：原缺摘要时正文状态位置留作对照。 */
+.articleLibraryPage .redfoxItem > .redfoxAvailability:only-of-type { grid-column: 2 / -1; justify-self: start; }
+/* 2026-10-24：本次修改原因：状态与多选操作使用正常字号，结果栏避免重复说明。 */
+.libraryCandidateToolbar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap;
+  gap: 12px; padding: 14px 0; }
+.libraryCandidateSelection, .libraryStatusFilter { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
+.libraryCandidateSelection label, .libraryCandidateSelection strong, .libraryStatusFilter span { font-size: 14px; color: var(--color-text); }
+.libraryCandidateSelection label, .libraryCandidateCheck { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
+.libraryCandidateSelection input, .libraryCandidateCheck input { width: 17px; height: 17px; accent-color: var(--color-accent); cursor: pointer; }
+.libraryCandidateCheck { grid-column: 1; grid-row: 1; justify-self: center; }
+.libraryCandidateToolbar .primaryButton { min-height: 38px; }
+.libraryStatusFilter { gap: 2px; }
+.libraryStatusFilter span { margin-right: 8px; }
+.libraryStatusFilter button { min-height: 36px; padding: 6px 12px; border: 0; border-radius: var(--radius-control);
+  background: transparent; color: var(--color-text-secondary); font: inherit; cursor: pointer; }
+.libraryStatusFilter button:hover { background: var(--color-surface-hover); }
+.libraryStatusFilter button.active { background: var(--color-accent-surface); color: var(--color-accent); font-weight: 650; }
+.articleLibraryPage .redfoxItemHead .libraryCandidateState { flex: none; padding: 3px 8px;
+  border-radius: var(--radius-control); background: var(--color-surface-muted); color: var(--color-text-secondary); font-size: 13px; }
+/* 2026-10-24：本次修改原因：批量核对清单展示每篇缺项与收录结果，不用小字说明段落。 */
+.libraryBatchDialog { width: min(900px, 100%); }
+.libraryBatchBody { overflow-y: auto; padding: 18px 22px; color: var(--color-text); font-size: 14px; }
+.libraryBatchBody > strong { display: block; margin-bottom: 12px; font-size: 15px; }
+/* 2026-10-24：本次修改原因：批量类目与权限确认放在逐篇清单上方，正文使用正常字号。 */
+.libraryBatchCommon { display: grid; gap: 12px; padding: 0 0 14px; border-bottom: var(--border-ui); }
+.libraryBatchCommon > label:first-child { display: flex; align-items: center; gap: 10px; font-size: 14px; }
+.libraryBatchCommon select { min-height: 38px; min-width: 180px; padding: 7px 10px; border: var(--border-ui);
+  border-radius: var(--radius-control); background: var(--color-surface); color: var(--color-text); font: inherit; }
+.libraryBatchCommon .libraryCheck { display: flex; align-items: center; gap: 9px; font-size: 14px; line-height: 1.5; }
+.libraryBatchCommon .libraryCheck input { width: 17px; height: 17px; flex: none; accent-color: var(--color-accent); }
+.libraryBatchReviewStatus { margin: 12px 0 0; color: var(--color-text); font-size: 14px; }
+.libraryBatchRow { display: grid; grid-template-columns: minmax(0, 1fr) minmax(100px, auto) auto;
+  align-items: center; gap: 12px; padding: 9px 0; border-bottom: var(--border-ui); }
+.libraryBatchRow > span:first-child { overflow-wrap: anywhere; font-weight: 600; }
+.libraryBatchRow > span:nth-child(2) { color: var(--color-text-secondary); }
+.libraryBatchRow button { min-height: 34px; }
+.libraryBatchResults { margin-top: 14px; }
+.libraryBatchResults p { margin: 5px 0; overflow-wrap: anywhere; }
+/* 2026-10-24：本次修改原因：窄屏允许标题、指标和来源信息自然换行，操作仍可点击。 */
+@media (max-width: 800px) {
+  .articleLibraryPage .redfoxItem { display: block; }
+  /* 2026-10-24：本次修改原因：窄屏批量清单与文章勾选仍能独立操作。 */
+  .libraryCandidateCheck { float: left; margin: 3px 10px 4px 0; }
+  .libraryBatchRow { grid-template-columns: minmax(0, 1fr) auto; }
+  .libraryBatchRow > span:nth-child(2) { grid-column: 1; }
+  .libraryBatchRow button { grid-column: 2; grid-row: 1 / 3; }
+  .articleLibraryPage .redfoxItemHead, .articleLibraryPage .redfoxMetrics,
+  .articleLibraryPage .redfoxItem > p { margin-bottom: 8px; }
+  /* 2026-10-24：本次修改原因：窄屏正文状态可以换行，不让长提示撑宽候选列表。 */
+  .articleLibraryPage .redfoxItem > .redfoxAvailability { white-space: normal; }
+  .articleLibraryPage .redfoxItemFoot { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+  .articleLibraryPage .redfoxItemFoot > span { white-space: normal; }
+}
+/* 2026-10-23：本次修改原因：候选取文期间用正常字号显示即时状态。 */
+.libraryFetchStatus { margin: 0 0 14px; color: var(--color-text-secondary); font-size: 14px; }
+
+/* 2026-10-23：本次修改原因：收录确认与样本双击编辑共用居中弹窗，缺失字段直接在操作区显示。 */
+.articleDialogBackdrop { position: fixed; inset: 0; z-index: 90; display: grid; place-items: center;
+  padding: 24px; background: #15251db3; }
+.articleDialog { display: flex; flex-direction: column; width: min(760px, 100%); max-height: min(88vh, 900px);
+  min-width: 0; border-radius: var(--radius-panel); background: var(--color-surface);
+  box-shadow: 0 20px 60px #0003; }
+.articleDialogHead { display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 18px 22px; border-bottom: var(--border-ui); }
+.articleDialogHead h2 { margin: 0; color: var(--color-text); font-size: 18px; }
+.articleDialogClose { border: 0; background: transparent; color: var(--color-text-secondary);
+  font-size: 25px; line-height: 1; cursor: pointer; }
+.articleDialogReview, .articleDialogForm { min-height: 0; overflow-y: auto; padding: 18px 22px; }
+.articleDialogReview dl { display: grid; gap: 0; margin: 0 0 18px; }
+.articleDialogReview dl > div { display: grid; grid-template-columns: 105px minmax(0, 1fr); gap: 12px;
+  padding: 9px 0; border-bottom: var(--border-ui); }
+.articleDialogReview dt { color: var(--color-text-secondary); font-weight: 650; }
+.articleDialogReview dd { min-width: 0; margin: 0; overflow-wrap: anywhere; color: var(--color-text); }
+.articleDialogReview .libraryCheck { display: flex; align-items: center; gap: 9px; font-size: 14px; }
+.articleDialogMissing { display: flex; align-items: start; gap: 10px; margin: 12px 22px; padding: 10px 12px;
+  border-radius: var(--radius-control); background: #fff4e9; color: #7f4d14; font-size: 14px; }
+.articleDialogReview .articleDialogMissing { margin: 0 0 14px; }
+.articleDialogActions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 9px;
+  padding: 14px 22px; border-top: var(--border-ui); }
+.articleDialogActions button { min-height: 38px; }
+/* 2026-10-24：本次修改原因：删除确认集中展示文章标题和不可恢复的影响，字号与编辑弹窗一致。 */
+.libraryDeleteDialog { width: min(480px, 100%); }
+.libraryDeleteContent { display: grid; gap: 10px; padding: 20px 22px; color: var(--color-text); font-size: 14px; }
+.libraryDeleteContent strong { overflow-wrap: anywhere; font-size: 16px; }
+.libraryDeleteContent p { margin: 0; line-height: 1.6; }
+.articleDialogMetrics { display: grid; gap: 8px; padding: 12px; border: var(--border-ui);
+  border-radius: var(--radius-control); color: var(--color-text-secondary); font-size: 13px; }
+.articleDialogMetrics strong { color: var(--color-text); font-size: 14px; }
+/* 2026-10-24：本次修改原因：已保存的历史读数收起为可展开摘要，避免编辑弹窗重复占高。 */
+details.articleDialogMetrics { display: block; }
+details.articleDialogMetrics summary { color: var(--color-text); font-size: 14px; font-weight: 650; cursor: pointer; }
+details.articleDialogMetrics > div { margin-top: 9px; line-height: 1.55; }
+/* 2026-10-24：本次修改原因：候选原始读数作为核对信息，用可读的字号展示。 */
+.articleDialogMetrics .libraryMetricInputs label, .articleDialogForm label > small { font-size: 13px; }
+/* 2026-10-24：本次修改原因：原始请求与返回字段可展开核对，长链接和摘要不会撑破弹窗。 */
+.articleSourceFields { padding: 10px 12px; border: var(--border-ui); border-radius: var(--radius-control); }
+.articleSourceFields summary { color: var(--color-text); font-size: 14px; font-weight: 650; cursor: pointer; }
+.articleSourceFields strong { display: block; margin: 12px 0 5px; font-size: 13px; }
+.articleSourceFields dl { margin: 0; }
+.articleSourceFields dl > div { display: grid; grid-template-columns: 130px minmax(0, 1fr); gap: 10px;
+  padding: 6px 0; border-bottom: var(--border-ui); font-size: 13px; }
+.articleSourceFields dt { color: var(--color-text-secondary); }
+.articleSourceFields dd { min-width: 0; margin: 0; overflow-wrap: anywhere; }
+@media (max-width: 680px) {
+  .articleDialogBackdrop { padding: 10px; }
+  .articleDialog { max-height: 96vh; }
+  .articleDialogReview dl > div { grid-template-columns: 78px minmax(0, 1fr); }
+}
+
+/* 2026-10-23：本次修改原因：日期范围以单个紧凑控件呈现，展开后提供预设、日历和确认操作。 */
+.dateRangeField { min-width: 230px; }
+.dateRangePicker { position: relative; min-width: 0; }
+.dateRangeTrigger { display: flex; align-items: center; gap: 9px; width: 100%; min-height: 43px;
+  padding: 9px 12px; border: var(--border-ui); border-radius: var(--radius-control);
+  background: var(--color-surface); color: var(--color-text); font: inherit; text-align: left; cursor: pointer; }
+.dateRangeTrigger:hover { border-color: var(--color-accent); }
+.dateRangeText { min-width: 0; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* 2026-10-24：本次修改原因：日期范围和采集下拉框共用同一箭头，尺寸与垂直位置保持一致。 */
+.articleLibraryPage .redfoxCollectForm {
+  --collect-dropdown-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%233b4b44' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m4 7 6 6 6-6'/%3E%3C/svg%3E");
+}
+.articleLibraryPage .redfoxCollectForm .field select,
+.articleLibraryPage .redfoxCollectForm .dateRangeTrigger {
+  padding-right: 34px;
+  background-image: var(--collect-dropdown-arrow);
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 14px 14px;
+}
+.articleLibraryPage .redfoxCollectForm .field select { appearance: none; }
+.dateRangePopover { position: absolute; right: 0; top: calc(100% + 8px); z-index: 40;
+  width: min(680px, calc(100vw - 48px)); padding: 14px; border: var(--border-ui);
+  border-radius: var(--radius-panel); background: var(--color-surface); box-shadow: 0 14px 36px #0002; }
+.dateRangePresets { display: flex; flex-wrap: wrap; gap: 7px; padding-bottom: 12px; border-bottom: var(--border-ui); }
+.dateRangePresets button, .dateRangeMonth button, .dateRangeButtons > button:first-child {
+  min-height: 34px; padding: 6px 11px; border: var(--border-ui); border-radius: var(--radius-control);
+  background: var(--color-surface); color: var(--color-text); font: inherit; cursor: pointer; }
+.dateRangePresets button:hover, .dateRangeMonth button:hover { background: var(--color-surface-hover); }
+.dateRangeBody { display: grid; grid-template-columns: minmax(210px, .75fr) minmax(260px, 1fr); gap: 16px; padding-top: 14px; }
+.dateRangeInputs { display: grid; align-content: start; gap: 10px; }
+.dateRangeInputs label { display: grid; gap: 6px; color: var(--color-text-secondary); font-size: 13px; }
+.dateRangeInputs input { width: 100%; min-height: 38px; padding: 7px; border: var(--border-ui);
+  border-radius: var(--radius-control); background: var(--color-surface); color: var(--color-text); font: inherit; }
+.dateRangeButtons { display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px; }
+.dateRangeButtons .primaryButton { min-height: 36px; padding: 7px 18px; }
+.dateRangeCalendar { padding: 10px; border-radius: var(--radius-control); background: var(--color-surface-muted); }
+.dateRangeMonth { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.dateRangeMonth strong { font-size: 14px; }
+.dateRangeMonth button { border: 0; background: transparent; font-size: 20px; }
+.dateRangeGrid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 3px; text-align: center; }
+.dateRangeGrid span { padding: 6px 0; color: var(--color-text-muted); font-size: 12px; }
+.dateRangeGrid button { min-height: 32px; border: 0; border-radius: 5px; background: transparent;
+  color: var(--color-text); font: inherit; cursor: pointer; }
+.dateRangeGrid button.outside { color: var(--color-text-muted); }
+.dateRangeGrid button.inRange { background: var(--color-accent-surface); }
+.dateRangeGrid button.edge { background: var(--color-accent); color: white; }
+@media (max-width: 680px) {
+  .dateRangePopover { left: 0; right: auto; }
+  .dateRangeBody { grid-template-columns: 1fr; }
+}
+
+/* 2026-10-23：本次修改原因：笔记本和窄屏下先保留列表或表单的可读宽度，再将详情顺序放到下方。 */
+@media (max-width: 1180px) {
+  .libraryWorkArea, .libraryProfileArea { grid-template-columns: 1fr; }
+}
+/* 2026-10-23：本次修改原因：内容宽度缩小时概况卡片分为三列，避免被侧栏挤窄。 */
+@media (max-width: 1100px) {
+  .librarySummary { grid-template-columns: repeat(3, minmax(0, 1fr)); max-width: 570px; }
+}
+@media (max-width: 760px) {
+  .libraryTop { align-items: start; flex-direction: column; }
+  .librarySummary { grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: 380px; }
+  .libraryFieldPair, .libraryMetricInputs, .libraryStatistics { grid-template-columns: 1fr; }
+  .sampleMetricFields { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .libraryArticleList, .libraryArticleDetail { padding: 18px; }
+  /* .libraryFilterBar label { flex: 1 1 140px; } .libraryFilterBar select { width: 100%; } 2026-10-23：原竖排筛选标签样式留作对照。 */
+  /* 2026-10-23：本次修改原因：窄屏仍保持标签在左侧，筛选组可自动分行。 */
+  .libraryFilterControls label { flex: 1 1 220px; }
+  .libraryFilterControls select { flex: 1 1 auto; min-width: 0; }
+}
+/* 2026-10-23：本次修改原因：窄屏时查询与手动录入按钮分行保持可点击宽度。 */
+@media (max-width: 680px) {
+  .libraryDiscoveryActions { width: 100%; flex: 1 1 100%; }
+  .articleLibraryPage .redfoxCollectForm .libraryDiscoveryActions > button { flex: 1 1 0; min-width: 0; width: auto; }
+}

@@ -10,6 +10,8 @@ import './workspace.css'
 // 2026-10-23：本次修改原因：以语义化主题变量和克制的视觉层覆盖旧样式，便于逐页迁移及以后扩展深色主题。
 import './design-tokens.css'
 import './workspace-modern.css'
+// 2026-10-23：本次修改原因：加载文章库的列表、详情、画像和窄屏布局样式。
+import './article-library.css'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

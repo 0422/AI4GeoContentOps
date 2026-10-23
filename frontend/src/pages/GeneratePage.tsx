@@ -86,28 +86,33 @@ export default function GeneratePage({ options }: { options: ContentOption[] }) 
 
   const selectedBrand = brands.find((item) => item.id === brandId)
   // 2026-10-23：本次修改原因：只向用户提供适用于当前平台、类目和内容形式的策略。
+  // const compatibleStrategies = publishedStrategies.filter((item) => item.platform_id === platformId && (!item.category_id || item.category_id === categoryId) && (!item.format_id || item.format_id === formatId)) // 2026-10-23：原筛选保留供对照。
+  // 2026-10-23：本次修改原因：画像策略只出现在其目标受众的生成简报中。
   const compatibleStrategies = publishedStrategies.filter((item) =>
     item.platform_id === platformId && (!item.category_id || item.category_id === categoryId) &&
-    (!item.format_id || item.format_id === formatId))
+    (!item.format_id || item.format_id === formatId) &&
+    (!item.profile_audience_id || item.profile_audience_id === audienceId))
   const previewStrategy = strategyChoice
     ? compatibleStrategies.find((item) => item.id === strategyChoice) ?? null : strategy
 
-  useEffect(() => { setStrategyChoice('') }, [platformId, categoryId, formatId])
+  // useEffect(() => { setStrategyChoice('') }, [platformId, categoryId, formatId]) // 2026-10-23：原依赖保留供对照。
+  useEffect(() => { setStrategyChoice('') }, [platformId, categoryId, formatId, audienceId])
 
   useEffect(() => {
-    if (!platformId || !categoryId || !formatId) {
+    if (!platformId || !categoryId || !formatId || !audienceId) {
       setStrategy(null)
       return
     }
     let current = true
     setStrategyLoading(true)
     setStrategyError('')
-    getMatchingStrategy(platformId, categoryId, formatId)
+    // getMatchingStrategy(platformId, categoryId, formatId) // 2026-10-23：原调用保留供对照。
+    getMatchingStrategy(platformId, categoryId, formatId, audienceId)
       .then((value) => { if (current) setStrategy(value) })
       .catch((reason) => { if (current) setStrategyError(reason instanceof Error ? reason.message : '策略读取失败') })
       .finally(() => { if (current) setStrategyLoading(false) })
     return () => { current = false }
-  }, [platformId, categoryId, formatId])
+  }, [platformId, categoryId, formatId, audienceId])
 
   // 2026-10-23：本次修改原因：返回生成页时恢复最近任务及其已保存修订稿。
   useEffect(() => {
@@ -314,7 +319,8 @@ export default function GeneratePage({ options }: { options: ContentOption[] }) 
         {/* <div className="sectionHeading compact"><div><span className="stepTag teal">02</span><h2>本次创作策略</h2></div></div> 2026-10-23：原分步标题保留供对照。 */}
         {/* 2026-10-23：本次修改原因：策略侧栏只展示选择结论，完整规则按需展开。 */}
         <div className="sectionHeading compact"><div><h2>写作策略</h2></div></div>
-        <div className="selectionLine">{label(platformId) || '目标平台'} <span>·</span> {label(categoryId) || '内容类目'} <span>·</span> {label(formatId) || '内容形式'}</div>
+        {/* 2026-10-23：本次修改原因：策略预览把受众范围与平台、类目和形式一起展示。 */}
+        <div className="selectionLine">{label(platformId) || '目标平台'} <span>·</span> {label(categoryId) || '内容类目'} <span>·</span> {label(formatId) || '内容形式'} <span>·</span> {label(audienceId) || '目标读者'}</div>
         {strategyLoading && !strategyChoice ? <p className="muted">正在匹配已发布策略…</p> : strategyError ?
           <p className="alert error" role="alert">{strategyError}</p> : previewStrategy ? <>
             <div className="strategyStatus"><span className="statusDot" /> {strategyChoice ? '已选择' : '已匹配'}审核通过的策略 <strong>V{previewStrategy.version}</strong></div>
@@ -327,7 +333,8 @@ export default function GeneratePage({ options }: { options: ContentOption[] }) 
             </div>)}</dl></details>
             {/* <p className="subtle">提交任务时会固定此策略版本；之后修改策略不会改变已提交任务。</p> 2026-10-23：原重复版本说明保留供对照。 */}
           </> : <div className="emptyStrategy"><span className="emptyGlyph">◇</span>
-            <h3>暂无匹配的已发布策略</h3><p>本次将使用通用写作规则。可先在“样本库”录入内容，再到“内容策略”提炼并发布。</p>
+            {/* <h3>暂无匹配的已发布策略</h3><p>本次将使用通用写作规则。可先在“样本库”录入内容，再到“内容策略”提炼并发布。</p> 2026-10-23：原提示保留供对照。 */}
+            <h3>暂无匹配的已发布策略</h3><p>本次将使用通用写作规则。可先在“参考文章库”录入内容、建立画像，再到“内容策略”审核发布。</p>
             <a href="#/strategies" className="inlineLink">前往内容策略 →</a>
           </div>}
       </aside>

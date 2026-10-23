@@ -1,0 +1,188 @@
+/* 2026-10-23：本次修改原因：将旧工作台的渐变、装饰、过小字体和重复提示收敛为编辑式 B2B 软件界面；旧规则暂留在 workspace.css 供对照。 */
+:root { font-family: var(--font-ui); color: var(--color-text); background: var(--color-canvas); }
+body { color: var(--color-text); background: var(--color-canvas); font-size: 14px; line-height: 1.5; }
+button, input, select, textarea { font-family: var(--font-ui); }
+:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+button:disabled { opacity: .52; }
+
+/* 2026-10-23：本次修改原因：导航只保留产品与页面名称，删除重复的状态装饰和顶栏口号。 */
+.appShell { background: var(--color-canvas); }
+.sidebar {
+  flex-basis: 220px; padding: 24px 12px 16px; color: var(--color-text);
+  border-right: var(--border-ui); background: var(--color-surface);
+}
+.brand { gap: 10px; padding: 2px 12px 26px; color: var(--color-text); }
+.brandMark { width: 34px; height: 34px; border-radius: 7px; background: var(--color-accent); color: var(--color-on-accent); font-size: 17px; box-shadow: none; }
+.brand strong { font-size: 16px; font-weight: 700; }
+.brand small, .navCaption, .navSymbol, .navWords small, .sidebarFoot, .topbar, .kicker, .headingIndex { display: none; }
+.sideNav { gap: 3px; }
+.navItem {
+  min-height: 40px; padding: 8px 12px; border: 0; border-radius: var(--radius-control);
+  color: var(--color-text-secondary); transition: color var(--motion-fast), background var(--motion-fast);
+}
+.navItem:hover { color: var(--color-text); background: var(--color-surface-hover); }
+.navItem.active { color: var(--color-accent); background: var(--color-accent-surface); box-shadow: none; }
+.navWords strong { font-size: 14px; font-weight: 600; }
+.pageContent { max-width: 1420px; padding: 32px 38px 72px; }
+.pageHeading { align-items: center; margin-bottom: 22px; }
+.pageHeading h1 { font-size: 25px; line-height: 1.25; font-weight: 700; letter-spacing: -.03em; }
+.pageHeading p:last-child { display: none; }
+.pageHeadingAction { display: inline-flex; align-items: center; }
+
+/* 2026-10-23：本次修改原因：以边框和排版建立层级，让表单、列表、结果采用同一套控件尺度。 */
+.card, .panel {
+  padding: 24px; border: var(--border-ui); border-radius: var(--radius-panel);
+  background: var(--color-surface); box-shadow: none;
+}
+.sectionHeading { align-items: center; margin-bottom: 18px; }
+.sectionHeading h2, .modelSectionTitle h2 { color: var(--color-text); font-size: 16px; font-weight: 650; letter-spacing: -.01em; }
+.sectionHeading p, .stepTag, .infoBanner { display: none; }
+.sectionHeading > div:first-child { gap: 0; }
+.editorGrid, .twoColumnLayout, .strategyLayout, .brandLayout { gap: 18px; }
+.editorGrid { grid-template-columns: minmax(0, 1.35fr) minmax(300px, .65fr); }
+.strategyLayout { grid-template-columns: minmax(320px, .84fr) minmax(0, 1.16fr); }
+.contentForm { gap: 16px; }
+.field { gap: 7px; color: var(--color-text-secondary); font-size: 13px; font-weight: 600; }
+.field span small { color: var(--color-text-muted); font-size: 12px; }
+.field > small { color: var(--color-text-muted); font-size: 12px; }
+.field em { color: var(--color-danger); }
+.field input, .field select, .field textarea, .libraryFilters input, .libraryFilters select, .addOptionRow input, .optionEdit, .settingsRow select {
+  min-height: 40px; padding: 9px 11px; border: var(--border-ui); border-radius: var(--radius-control);
+  color: var(--color-text); background: var(--color-surface);
+  transition: border-color var(--motion-fast), box-shadow var(--motion-fast);
+}
+.field input::placeholder, .field textarea::placeholder, .libraryFilters input::placeholder { color: var(--color-text-muted); }
+.field input:hover, .field select:hover, .field textarea:hover, .libraryFilters input:hover, .libraryFilters select:hover { border-color: var(--color-border-strong); }
+.field input:focus, .field select:focus, .field textarea:focus, .libraryFilters input:focus, .libraryFilters select:focus, .addOptionRow input:focus, .optionEdit:focus, .settingsRow select:focus {
+  border-color: var(--color-focus); box-shadow: 0 0 0 3px var(--color-focus-ring);
+}
+.field input:disabled, .field select:disabled, .field textarea:disabled { background: var(--color-surface-muted); }
+.checkField { color: var(--color-text-secondary); font-size: 13px; }
+.checkField input, .samplePick input, .sampleChooserItem input { accent-color: var(--color-accent); }
+.primaryButton, .secondaryButton, .quietButton, .dangerButton, .textButton, .settingsRow button {
+  min-height: 38px; padding: 8px 13px; border-radius: var(--radius-control);
+  font-size: 13px; font-weight: 600; box-shadow: none;
+  transition: background var(--motion-fast), border-color var(--motion-fast), color var(--motion-fast);
+}
+.primaryButton, .settingsRow button { border: 1px solid var(--color-accent); background: var(--color-accent); color: var(--color-on-accent); }
+.primaryButton:hover:not(:disabled), .settingsRow button:hover:not(:disabled) { background: var(--color-accent-hover); transform: none; }
+.secondaryButton { border: var(--border-ui); color: var(--color-text); background: var(--color-surface); }
+.secondaryButton:hover:not(:disabled) { border-color: var(--color-border-strong); background: var(--color-surface-muted); }
+.quietButton, .dangerButton { border: 1px solid var(--color-danger-border); color: var(--color-danger); background: var(--color-surface); }
+.quietButton:hover:not(:disabled), .dangerButton:hover:not(:disabled) { background: var(--color-danger-surface); }
+.textButton, .inlineLink { color: var(--color-accent); background: transparent; font-size: 13px; }
+.mutedButton { color: var(--color-text-muted); }
+.formActions > span { display: none; }
+.alert { margin-top: 14px; padding: 10px 12px; border-radius: var(--radius-control); font-size: 13px; }
+.alert.error { color: var(--color-danger); background: var(--color-danger-surface); }
+.alert.success { color: var(--color-success); background: var(--color-success-surface); }
+.alert.warning, .reviewNote { color: var(--color-warning); background: var(--color-warning-surface); }
+.muted, .subtle { color: var(--color-text-muted); font-size: 12px; }
+.statusPill, .miniStatus { font-size: 11px; }
+.statusPill.completed, .statusPill.published, .miniStatus.published { color: var(--color-success); background: var(--color-success-surface); }
+.statusPill.failed, .miniStatus.archived, .statusPill.archived { color: var(--color-danger); background: var(--color-danger-surface); }
+.statusPill.running { color: var(--color-accent); background: var(--color-accent-surface); }
+.countBadge { color: var(--color-text-secondary); background: var(--color-surface-muted); font-size: 12px; }
+.emptyStrategy, .emptyState { color: var(--color-text-muted); }
+.emptyStrategy h3, .emptyState h3 { color: var(--color-text); font-size: 15px; }
+.emptyGlyph, .emptyState > span { display: none; }
+
+/* 2026-10-23：本次修改原因：生成页以简报和文章为主，策略细则按需展开。 */
+.strategyPreview { position: static; max-height: none; }
+.selectionLine { padding: 0; color: var(--color-text-muted); background: transparent; font-size: 12px; }
+.strategyStatus { margin-top: 18px; color: var(--color-text-secondary); font-size: 12px; }
+.strategyStatus .statusDot { display: none; }
+.strategyPreview h3 { margin: 10px 0 14px; color: var(--color-text); font-size: 16px; }
+.strategyDetails { border-top: var(--border-ui); padding-top: 12px; }
+.strategyDetails summary, .referenceDetails summary { color: var(--color-accent); font-size: 13px; font-weight: 600; cursor: pointer; }
+.strategyDetails .guideList { margin-top: 16px; }
+.guideList dt { color: var(--color-text-muted); font-size: 12px; letter-spacing: 0; }
+.guideList dd { color: var(--color-text); font-size: 13px; }
+.taskCard { margin-top: 18px; scroll-margin-top: 24px; }
+.taskMeta, .articleFoot { color: var(--color-text-muted); font-size: 12px; }
+.articleTop { color: var(--color-text-secondary); font-size: 12px; letter-spacing: 0; }
+.articlePanel > h2 { color: var(--color-text); }
+.articleSummary { color: var(--color-text-secondary); }
+.renderedArticle { color: var(--color-text); font-size: 15px; line-height: 1.8; }
+.originalDraft { border: var(--border-ui); border-radius: var(--radius-control); }
+.reviewNote { font-size: 12px; }
+
+/* 2026-10-23：本次修改原因：样本、策略与品牌列表改成紧凑的资料库视图，避免卡片套卡片。 */
+.redfoxPilot { margin-bottom: 18px; }
+.externalCost { color: var(--color-text-muted); font-size: 12px; }
+.redfoxModeNote, .settingIntro p, .brandFactsHeading p { display: none; }
+.redfoxSummary { color: var(--color-text-secondary); font-size: 13px; }
+.redfoxResults { gap: 0; border-top: var(--border-ui); }
+.redfoxItem { padding: 16px 0; border: 0; border-bottom: var(--border-ui); border-radius: 0; background: transparent; }
+.redfoxItemHead h3 { color: var(--color-text); font-size: 15px; }
+.redfoxItemHead span { color: var(--color-text-secondary); font-size: 12px; }
+.redfoxItem > p { color: var(--color-text-secondary); font-size: 13px; }
+.redfoxItemFoot { color: var(--color-text-muted); font-size: 12px; }
+.redfoxMetrics span { border-radius: 4px; color: var(--color-text-secondary); background: var(--color-surface-muted); font-size: 12px; }
+.redfoxItem > .redfoxAvailability { color: var(--color-warning); }
+.singleColumnLayout { display: block; }
+.singleColumnLayout .libraryCard { min-height: 0; }
+/* 2026-10-23：本次修改原因：候选卡片跳转到展开后的表单时保留呼吸空间。 */
+#sample-import-form { scroll-margin-top: 24px; }
+.sampleItem { padding: 16px 0; }
+.sampleTags span { border-radius: 4px; color: var(--color-text-secondary); background: var(--color-surface-muted); font-size: 11px; }
+.sampleItem h3 { color: var(--color-text); font-size: 14px; }
+.sampleItem p, .sampleMeta, .sampleItem details { color: var(--color-text-muted); font-size: 12px; }
+.sampleBody { border-radius: var(--radius-control); color: var(--color-text-secondary); background: var(--color-surface-muted); }
+.sampleChooser { border: var(--border-ui); border-radius: var(--radius-control); background: var(--color-surface); }
+.sampleChooserHead, .sampleChooserItem strong { color: var(--color-text); font-size: 13px; }
+.sampleChooserItem small { color: var(--color-text-muted); font-size: 12px; }
+.strategyList { gap: 0; border-top: var(--border-ui); }
+.strategyListItem { gap: 6px; padding: 13px 10px; border: 0; border-bottom: var(--border-ui); border-radius: 0; background: transparent; }
+.strategyListItem:hover { border-color: var(--color-border); background: var(--color-surface-muted); }
+.strategyListItem.selected { border-color: var(--color-border); background: var(--color-accent-surface); }
+.strategyListTop strong { color: var(--color-text); font-size: 13px; }
+.strategyListMeta { color: var(--color-text-muted); font-size: 12px; }
+.strategyReferences, .brandFact { border: var(--border-ui); border-radius: var(--radius-control); background: var(--color-surface); font-size: 13px; }
+.referenceDetails { margin-top: 18px; padding-top: 12px; border-top: var(--border-ui); }
+.referenceDetails .strategyReferences { margin-top: 12px; }
+.brandFactsHeading h3, .brandFactTitle strong { color: var(--color-text); font-size: 13px; }
+.candidateHandoff { border-color: var(--color-border); background: var(--color-surface); }
+.candidateHandoff strong { color: var(--color-text); }
+
+/* 2026-10-23：本次修改原因：设置和状态控件沿用同一主题，并保留小屏可操作空间。 */
+.tabBar { gap: 4px; }
+.tab { border-radius: var(--radius-control); color: var(--color-text-secondary); font-size: 13px; }
+.tab.active { color: var(--color-accent); background: var(--color-accent-surface); }
+.tab small { color: var(--color-text-muted); font-size: 11px; }
+.optionRow { border-color: var(--color-border); }
+.optionRow strong { color: var(--color-text); font-size: 13px; }
+.optionOrder { color: var(--color-text-muted); font-size: 12px; }
+.modelSettings .panel h2 { display: none; }
+.modelSettings .note { color: var(--color-text-muted); font-size: 12px; }
+.settingsRow button { white-space: nowrap; }
+
+@media (max-width: 1180px) {
+  .editorGrid, .strategyLayout, .brandLayout { grid-template-columns: 1fr; }
+}
+@media (max-width: 920px) {
+  .sidebar { width: 100%; padding: 12px 16px; border-right: 0; border-bottom: var(--border-ui); }
+  .brand { padding: 0 0 10px; }
+  .sideNav { gap: 4px; }
+  .navItem { min-height: 38px; }
+  .pageContent { padding: 28px 24px 56px; }
+}
+@media (max-width: 680px) {
+  .pageContent { padding: 22px 14px 48px; }
+  .pageHeading h1 { font-size: 22px; }
+  .card, .panel { padding: 18px; }
+  .contentForm, .twoColumnLayout, .libraryFilters { grid-template-columns: 1fr; }
+  .formActions .primaryButton { width: 100%; }
+  .redfoxItemFoot > div { flex-wrap: wrap; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition-duration: .01ms !important; }
+}
+
+/* 2026-10-23：本次修改原因：侧边栏已标明当前模块，右侧直接进入操作区；保留语义标题供读屏器使用。 */
+.pageHeading { display: flex; justify-content: flex-end; align-items: center; min-height: 0; margin: 0; }
+.pageHeading > div:first-child {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0;
+}
+.pageHeadingAction { display: inline-flex; margin: 0 0 16px auto; }

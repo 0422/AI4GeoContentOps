@@ -1,0 +1,9 @@
+# 2026-10-23：避免提交本地数据、解释器缓存和前端依赖。
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.idea/
+backend/data/
+frontend/node_modules/
+frontend/dist/
+.env

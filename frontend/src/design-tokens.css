@@ -1,0 +1,41 @@
+/* 2026-10-23：本次修改原因：建立适用于内容生产工作台的语义化浅色主题，统一颜色、排版、间距、圆角和交互状态。 */
+:root {
+  color-scheme: light;
+  --font-ui: Inter, "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  --color-canvas: #f8f9fa;
+  --color-surface: #ffffff;
+  --color-surface-muted: #f5f7f6;
+  --color-surface-hover: #f0f3f1;
+  --color-text: #17191d;
+  --color-text-secondary: #5f6670;
+  /* 2026-10-23：本次修改原因：辅助文字在浅灰页面背景上也保持足够对比度。 */
+  --color-text-muted: #626872;
+  --color-border: #e5e7eb;
+  --color-border-strong: #cbd2d0;
+  --color-accent: #345c50;
+  --color-accent-hover: #294a40;
+  --color-accent-surface: #edf3ef;
+  --color-on-accent: #ffffff;
+  --color-focus: #427966;
+  --color-focus-ring: #42796620;
+  --color-success: #286b4f;
+  --color-success-surface: #eaf5ee;
+  --color-warning: #845b20;
+  --color-warning-surface: #fbf3e5;
+  --color-danger: #a3453f;
+  --color-danger-surface: #fbefed;
+  --color-danger-border: #e5c8c3;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --radius-control: 6px;
+  --radius-panel: 10px;
+  --radius-pill: 999px;
+  --border-ui: 1px solid var(--color-border);
+  --shadow-menu: 0 12px 32px #17191d12;
+  --motion-fast: 150ms ease;
+}

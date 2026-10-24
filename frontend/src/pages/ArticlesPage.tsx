@@ -397,9 +397,15 @@ export default function ArticlesPage({ options }: { options: ContentOption[] }) 
                   <option value="pending">待核对</option><option value="ready">可分析</option><option value="excluded">已排除</option></select></label></div>
               <label>使用权限说明<textarea rows={2} value={draft.usage_rights_note}
                 onChange={(event) => setDraft({ ...draft, usage_rights_note: event.target.value })} /></label>
+              {/* <label className="libraryCheck"><input type="checkbox" checked={draft.rights_confirmed}
+                onChange={(event) => setDraft({ ...draft, rights_confirmed: event.target.checked,
+                  review_status: event.target.checked ? draft.review_status : 'pending' })} />已确认本项目可存储、分析和使用该正文</label> 2026-10-24：原只确认权限、不完成复核的做法留作对照。 */}
+              {/* 2026-10-24：本次修改原因：详情编辑中的权限确认与录入弹窗保持同一复核状态规则。 */}
               <label className="libraryCheck"><input type="checkbox" checked={draft.rights_confirmed}
                 onChange={(event) => setDraft({ ...draft, rights_confirmed: event.target.checked,
-                  review_status: event.target.checked ? draft.review_status : 'pending' })} />已确认本项目可存储、分析和使用该正文</label>
+                  review_status: event.target.checked ? (draft.review_status === 'excluded' ? 'excluded' : 'ready') : 'pending' })} />
+                {/* 2026-10-24：本次修改原因：权限勾选联动复核状态时明确原文核对含义。 */}
+                我已核对原文，并确认可在本项目中存储、分析和使用该正文</label>
               <button className="primaryButton" type="submit" disabled={busy}>{busy ? '正在保存…' : '保存文章'}</button>
             </form> : <>
               <p className="libraryMeta">{label(article.platform_id)} · {label(article.category_id)} · {label(article.format_id)} · {label(article.audience_id)}
@@ -429,8 +435,8 @@ export default function ArticlesPage({ options }: { options: ContentOption[] }) 
               {/* <details><summary>互动指标快照（{article.metrics.length}）</summary> 2026-10-24：原泛称留作对照。 */}
               {/* 2026-10-24：本次修改原因：明确这些读数属于入库的来源文章，而非未来生成稿。 */}
               {/* 2026-10-24：本次修改原因：来源文章互动读数区块从样本详情移除；原补录和历史展示暂保留在代码中。 */}
-              {false && <details><summary>来源文章互动读数（{article.metrics.length}）</summary>
-                {article.metrics.map((item: ArticleMetric) => <div className="libraryMetricRow" key={item.id}>
+              {false && <details><summary>来源文章互动读数（{article?.metrics?.length || 0}）</summary>
+                {article?.metrics?.map((item: ArticleMetric) => <div className="libraryMetricRow" key={item.id}>
                   <strong>{displayDate(item.captured_at)} · {item.source}</strong>
                   {/* <span>曝光 {metricValue(item.impressions)} · 点击 {metricValue(item.clicks)} · 阅读 {metricValue(item.reads)}</span>
                   <span>点赞 {metricValue(item.likes)} · 收藏 {metricValue(item.saves)} · 评论 {metricValue(item.comments)} · 分享 {metricValue(item.shares)}</span> 2026-10-24：原不含在看和近似值的展示留作对照。 */}

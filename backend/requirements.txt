@@ -3,6 +3,8 @@ fastapi==0.141.1
 pydantic==2.13.5
 uvicorn==0.52.4
 SQLAlchemy==2.1.3
+# 2026-10-24：本次修改原因：Stage 2A 使用 Alembic 管理目标库版本化迁移。
+alembic>=1.15,<2
 # 2026-10-23：增加兼容 DeepSeek Chat Completions 的模型调用 SDK。
 openai==3.24.0
 # 2026-10-23：本次修改原因：让后端从 Git 忽略的 .env 文件加载模型密钥。

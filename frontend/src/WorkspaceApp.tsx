@@ -3,8 +3,9 @@ import { useCallback, useEffect, useState } from 'react'
 import { getOptions, type ContentOption } from './workspaceApi'
 import GeneratePage from './pages/GeneratePage'
 // import SamplesPage from './pages/SamplesPage' // 2026-10-23：原样本页入口保留供对照。
-// 2026-10-23：本次修改原因：文章库默认进入可分页的样本管理，旧样本页嵌入发现与录入视图。
-import ArticlesPage from './pages/ArticlesPage'
+// import ArticlesPage from './pages/ArticlesPage' // 2026-10-24：v1 页面暂留供迁移对照，不再作为目标库入口。
+// 2026-10-24：本次修改原因：Stage 2C 的文章管理与发现页改用目标库 v2 API 和统一文章表单。
+import ArticleLibraryV2Page from './pages/ArticleLibraryV2Page'
 import StrategiesPage from './pages/StrategiesPage'
 import SettingsPage from './pages/SettingsPage'
 // 2026-10-23：本次修改原因：增加可审核的品牌事实库入口。
@@ -121,8 +122,9 @@ export default function WorkspaceApp() {
         {loading ? <div className="loadingBlock">正在加载工作台配置…</div> : <>
           {page === 'generate' && <GeneratePage options={options} />}
           {/* {page === 'samples' && <SamplesPage options={options} />} 2026-10-23：原页面挂载保留供对照。 */}
-          {/* 2026-10-23：本次修改原因：将文章库三个操作入口收束到同一模块。 */}
-          {page === 'samples' && <ArticlesPage options={options} />}
+          {/* {page === 'samples' && <ArticlesPage options={options} />} 2026-10-24：v1 页面保留供对照。 */}
+          {/* 2026-10-24：本次修改原因：文章库的正式录入和样本管理统一切换到 v2 目标数据契约。 */}
+          {page === 'samples' && <ArticleLibraryV2Page options={options} />}
           {page === 'strategies' && <StrategiesPage options={options} />}
           {/* 2026-10-23：本次修改原因：呈现品牌资料管理与审核页面。 */}
           {page === 'brands' && <BrandPage />}

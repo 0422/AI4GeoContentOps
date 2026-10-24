@@ -191,7 +191,9 @@ export default function ArticleEditorDialog({ mode, initial, options, metrics = 
         {/* <label className="libraryCheck"><input type="checkbox" checked={draft.rights_confirmed} onChange={(event) => update('rights_confirmed', event.target.checked)} /> 2026-10-24：原仅更新权限状态的做法留作对照。 */}
         {/* 2026-10-24：本次修改原因：候选简表确认后，入库复核状态同步为可分析。 */}
         <label className="libraryCheck"><input type="checkbox" checked={draft.rights_confirmed} onChange={(event) => confirmRights(event.target.checked)} />
-          我确认本项目可存储、分析和使用该正文</label>
+          {/* 我确认本项目可存储、分析和使用该正文 2026-10-24：原标签未说明原文核对，留作对照。 */}
+          {/* 2026-10-24：本次修改原因：勾选同时完成复核，明确告知原文核对含义。 */}
+          我已核对原文，并确认本项目可存储、分析和使用该正文</label>
       </div>}
       {expanded && <form id="article-editor-form" className="libraryEditForm articleDialogForm" onSubmit={(event) => void submit(event)}>
         <label>标题<input required maxLength={300} value={draft.title} onChange={(event) => update('title', event.target.value)} /></label>
@@ -231,7 +233,9 @@ export default function ArticleEditorDialog({ mode, initial, options, metrics = 
           rights_confirmed: event.target.checked, review_status: event.target.checked ? current.review_status : 'pending' }))} /> 2026-10-24：原确认权限后仍保持待核对的做法留作对照。 */}
         {/* 2026-10-24：本次修改原因：完整表单和候选简表按相同规则同步复核状态。 */}
         <label className="libraryCheck"><input type="checkbox" checked={draft.rights_confirmed} onChange={(event) => confirmRights(event.target.checked)} />
-          已确认本项目可存储、分析和使用该正文</label>
+          {/* 已确认本项目可存储、分析和使用该正文 2026-10-24：原标签未说明原文核对，留作对照。 */}
+          {/* 2026-10-24：本次修改原因：完整录入表单与候选简表使用相同确认语义。 */}
+          我已核对原文，并确认本项目可存储、分析和使用该正文</label>
         {/* {mode === 'create' && <div className="articleDialogMetrics"><strong>互动数据快照</strong><span>{draft.metric_source}</span>
           <div className="libraryMetricInputs">{(['reads', 'likes', 'comments', 'shares'] as const).map((key) =>
             <label key={key}>{({ reads: '阅读', likes: '点赞', comments: '评论', shares: '分享' })[key]}

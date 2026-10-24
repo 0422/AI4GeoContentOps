@@ -3,7 +3,9 @@ import time
 
 from sqlalchemy import select, update
 
-from app.db import Base, SessionLocal, TaskModel, TaskResultModel, engine
+# 2026-10-24：本次修改原因：Worker 不再通过旧 Base 在启动时自动改动 Schema。
+# from app.db import Base, SessionLocal, TaskModel, TaskResultModel, engine
+from app.db import SessionLocal, TaskModel, TaskResultModel
 from app.llm import generate_article
 from app.schemas.task import TaskCreate
 
@@ -59,10 +61,12 @@ def process_task(task_id: str) -> None:
 
 
 def main() -> None:
-    Base.metadata.create_all(bind=engine)
+    # Base.metadata.create_all(bind=engine)  # 2026-10-24：目标库只通过 Alembic 迁移。
     # 2026-10-23：首期仅运行一个 Worker；重启后重新领取中断的任务。
     with SessionLocal() as session:
-        session.execute(update(TaskModel).where(TaskModel.status == "running").values(status="pending"))
+        # session.execute(update(TaskModel).where(TaskModel.status == "running").values(status="pending"))  # 2026-10-24：旧自动重试可能重复付费。
+        # 2026-10-24：本次修改原因：旧任务结果未知时先停为 outcome_unknown，由维护者确认后再决定是否重试。
+        session.execute(update(TaskModel).where(TaskModel.status == "running").values(status="outcome_unknown"))
         session.commit()
     print("任务 Worker 已启动；按 Ctrl+C 停止。")
     try:

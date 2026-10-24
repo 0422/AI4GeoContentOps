@@ -164,7 +164,9 @@ export default function SamplesPage({ options, mode = 'legacy', onSaved }: {
   // 2026-10-23：本次修改原因：按已提交的条件翻页并缓存看过的页，避免返回上一页时重复调用 RedFox。
   const [candidatePage, setCandidatePage] = useState(1)
   const candidatePages = useRef<Record<number, RedFoxSearchResult>>({})
-  const submittedQuery = useRef<Record<string, string> | null>(null)
+  // 2026-10-24：本次修改原因：缓存的发现查询必须保留必需的平台和采集方式字段，分页请求才能满足 API 契约。
+  type CandidateQuery = Omit<Parameters<typeof discoverRedFoxCandidates>[0], 'page'>
+  const submittedQuery = useRef<CandidateQuery | null>(null)
   const candidateRequestId = useRef(0)
   const [collectedIds, setCollectedIds] = useState<string[]>([])
   const [editor, setEditor] = useState<{ key: string; value: ArticleEditorValue; candidate: boolean; issue: string } | null>(null)
@@ -336,7 +338,7 @@ export default function SamplesPage({ options, mode = 'legacy', onSaved }: {
       if (collectMode === 'keyword' && collectKeyword.trim().length < 2) {
         throw new Error('请至少输入两个关键词字符')
       }
-      const search = {
+      const search: CandidateQuery = {
         platform: collectPlatform, method: collectMode,
         keyword: collectMode === 'keyword' ? collectKeyword.trim() : '',
         category: needsCategory ? (collectPlatform === 'xiaohongshu' ? xhsCategory : rankCategory) : '',
@@ -1153,7 +1155,8 @@ export default function SamplesPage({ options, mode = 'legacy', onSaved }: {
       {/* <section className="card"> 2026-10-23：原开头暂留供对照。 */}
       {/* {showSampleForm && <section className="card" id="sample-import-form"> 2026-10-23：原发现页下方展开表单的条件暂留供对照。 */}
       {/* 2026-10-23：本次修改原因：发现页改用统一弹窗，旧表单仍供旧页面模式使用。 */}
-      {mode === 'legacy' && showSampleForm && <section className="card" id="sample-import-form">
+      {/* 2026-10-24：本次修改原因：旧表单也保留 discovery 分支的可选字段，避免外层条件把 discovery 类型缩窄为 legacy。 */}
+      {showSampleForm && <section className="card" id="sample-import-form">
         {/* <div className="sectionHeading"><div><span className="stepTag">01</span><h2>录入参考文章</h2></div></div> 2026-10-23：原标题保留供对照。 */}
         {/* 2026-10-23：本次修改原因：明确手动录入是可选的备用路径。 */}
         {/* <div className="sectionHeading"><div><span className="stepTag">01</span><h2>手动录入参考文章 <small>可选</small></h2></div></div> 2026-10-23：原冗余“可选”标题保留供对照。 */}
@@ -1230,7 +1233,9 @@ export default function SamplesPage({ options, mode = 'legacy', onSaved }: {
           {/* 2026-10-24：本次修改原因：旧录入入口确认权限时也同步完成复核状态。 */}
           <label className="checkField full"><input type="checkbox" checked={rightsConfirmed}
             onChange={(event) => { setRightsConfirmed(event.target.checked); setReviewStatus(event.target.checked ? 'ready' : 'pending') }} required />
-            <span>我确认拥有该样本在本项目中存储、分析与使用的权限。</span>
+            {/* <span>我确认拥有该样本在本项目中存储、分析与使用的权限。</span> 2026-10-24：原标签未说明原文核对，留作对照。 */}
+            {/* 2026-10-24：本次修改原因：旧录入入口的勾选文案与自动完成复核的行为一致。 */}
+            <span>我已核对原文，并确认可在本项目中存储、分析和使用该正文。</span>
           </label>
           <div className="formActions"><button className="primaryButton" type="submit"
             disabled={busy || !platformId || !categoryId || !rightsConfirmed}>{busy ? '正在保存…' : '保存样本'}</button></div>

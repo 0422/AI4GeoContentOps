@@ -1,0 +1,191 @@
+/* 2026-10-24：本次修改原因：Stage 2C 页面按目标文章库的候选、列表、详情和统一编辑交互提供紧凑布局。 */
+.v2LibraryPage { display: grid; gap: 18px; min-width: 0; }
+.v2LibraryHeader, .v2LibraryTabs, .v2PanelHeading, .v2Pager, .v2CandidateActions {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+}
+.v2LibraryHeader h1 { margin: 0 0 4px; color: var(--color-text); font-size: 24px; }
+.v2LibraryHeader p { margin: 0; color: var(--color-text-secondary); font-size: 13px; }
+/* 2026-10-24：本次修改原因：标题留在左侧，统计卡使用标题栏右侧的空白区域。 */
+.v2LibraryHeader { gap: 20px; }
+.v2LibraryTabs { justify-content: flex-start; gap: 22px; border-bottom: var(--border-ui); overflow-x: auto; }
+.v2LibraryTabs button { padding: 11px 2px; border: 0; border-bottom: 2px solid transparent; background: transparent;
+  color: var(--color-text-secondary); font: inherit; white-space: nowrap; cursor: pointer; }
+.v2LibraryTabs button.active { border-bottom-color: var(--color-accent); color: var(--color-accent); font-weight: 650; }
+/* 2026-10-24：本次修改原因：导航上移后筛选与统计卡并排，统计卡尺寸贴近筛选控件。 */
+.v2OverviewRow { display: flex; align-items: center; justify-content: space-between; gap: 18px; min-width: 0; }
+.v2Summary { display: grid; flex: 0 0 auto; grid-template-columns: repeat(3, minmax(150px, 180px)); gap: 10px; }
+.v2Summary div { display: grid; gap: 2px; min-height: 50px; align-content: center; padding: 6px 12px;
+  border: var(--border-ui); border-radius: var(--radius-panel); background: var(--color-surface); }
+.v2Summary strong { color: var(--color-text); font-size: 18px; }
+.v2Summary span, .v2PanelHeading span { color: var(--color-text-muted); font-size: 12px; }
+/* 2026-10-24：本次修改原因：筛选器移到统计卡原位置后保持左对齐，不再被推到行尾。 */
+.v2Filters { display: flex; flex: 0 1 auto; align-items: center; justify-content: flex-start; flex-wrap: wrap; gap: 10px 16px; }
+.v2Filters label, .v2DiscoveryForm > label, .v2KeywordOptions label, .v2CandidateActions label {
+  display: flex; align-items: center; gap: 8px; color: var(--color-text-secondary); font-size: 13px; font-weight: 600;
+}
+.v2Filters select, .v2DiscoveryForm select, .v2DiscoveryForm input, .v2CandidateActions select {
+  min-width: 145px; min-height: 40px; padding: 8px 11px; border: var(--border-ui);
+  border-radius: var(--radius-control); background: var(--color-surface); color: var(--color-text); font: inherit;
+}
+.v2Workspace { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; align-items: start; }
+.v2Workspace.hasSelection { grid-template-columns: minmax(330px, .86fr) minmax(0, 1.14fr); }
+.v2ArticleListPanel, .v2ArticleDetailPanel, .v2CandidatePanel, .v2PreparationPanel {
+  min-width: 0; padding: 20px; border: var(--border-ui); border-radius: var(--radius-panel); background: var(--color-surface);
+}
+.v2ArticleDetailPanel { position: sticky; top: 16px; max-height: calc(100vh - 32px); overflow: auto; }
+.v2PanelHeading { margin-bottom: 14px; align-items: flex-start; }
+.v2PanelHeading h2, .v2PreparationPanel h2 { margin: 0; color: var(--color-text); font-size: 16px; }
+.v2PanelHeading > div { display: grid; gap: 5px; }
+/* 2026-10-24：本次修改原因：候选数量与会话状态和标题同排，减少候选区顶部高度。 */
+.v2CandidatePanel > .v2PanelHeading { align-items: center; }
+.v2ArticleRow { display: grid; width: 100%; gap: 5px; padding: 13px 10px; border: 0; border-bottom: var(--border-ui);
+  background: transparent; text-align: left; cursor: pointer; }
+.v2ArticleRow:hover { background: var(--color-surface-hover); }
+.v2ArticleRow.selected { background: var(--color-accent-surface); }
+.v2ArticleRow strong { color: var(--color-text); font-size: 14px; line-height: 1.45; }
+.v2ArticleRow span, .v2ArticleRow small { color: var(--color-text-muted); font-size: 12px; }
+.v2Pager { justify-content: center; margin-top: 16px; color: var(--color-text-muted); font-size: 12px; }
+.v2Empty { padding: 24px 8px; color: var(--color-text-muted); text-align: center; }
+.v2DetailGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); margin: 0; }
+.v2DetailGrid > div { display: grid; grid-template-columns: 112px minmax(0, 1fr); gap: 12px; padding: 10px 0;
+  border-bottom: var(--border-ui); }
+.v2DetailGrid dt { color: var(--color-text-muted); font-size: 12px; }
+.v2DetailGrid dd { min-width: 0; margin: 0; color: var(--color-text); font-size: 13px; overflow-wrap: anywhere; }
+/* 2026-10-24：本次修改原因：为右侧文章详情提供就地编辑控件，替代字段重复的编辑弹窗。 */
+.v2DetailTitleInput { flex: 1 1 auto; min-width: 0; font-size: 16px; font-weight: 650; }
+.v2DetailEditActions { display: flex; flex: 0 0 auto; gap: 8px; }
+.v2DetailInlineInput, .v2DetailInlineSelect, .v2DetailInlineTextarea { box-sizing: border-box; width: 100%; min-width: 0;
+  padding: 8px 10px; border: var(--border-ui); border-radius: var(--radius-control); background: var(--color-surface);
+  color: var(--color-text); font: inherit; }
+.v2DetailInlineTextarea { resize: vertical; line-height: 1.65; }
+.v2DetailBodyInput { min-height: 280px; }
+.v2DetailInlinePair { display: flex; gap: 8px; }
+.v2DetailInlinePair > * { flex: 1 1 0; }
+.v2DetailGrid dd a, .v2CandidateMeta a { color: var(--color-accent); }
+.v2Wide { grid-column: 1 / -1; }
+.v2ArticleBody { max-height: 360px; overflow: auto; white-space: pre-wrap; line-height: 1.75; }
+.v2Metrics { margin-top: 16px; padding: 13px; border-radius: var(--radius-control); background: var(--color-surface-muted); }
+.v2Metrics h3 { margin: 0 0 10px; font-size: 14px; }
+.v2Metrics > div { padding: 8px 0; border-top: var(--border-ui); }
+.v2Metrics span, .v2Metrics p { color: var(--color-text-secondary); font-size: 12px; }
+.v2Metrics p { margin: 5px 0 0; }
+.v2SourceDetails { margin-top: 16px; padding: 12px; border: var(--border-ui); border-radius: var(--radius-control); }
+.v2SourceDetails summary { color: var(--color-text); font-size: 13px; font-weight: 650; cursor: pointer; }
+.v2SourceDetails p, .v2SourceDetails h3, .v2SourceDetails strong { color: var(--color-text-secondary); font-size: 12px; }
+.v2SourceDetails pre { max-height: 300px; overflow: auto; padding: 10px; border-radius: 6px; background: var(--color-surface-muted);
+  color: var(--color-text-secondary); white-space: pre-wrap; overflow-wrap: anywhere; font-size: 11px; }
+.v2DiscoveryForm { display: flex; align-items: end; flex-wrap: wrap; gap: 12px; padding: 18px;
+  border: var(--border-ui); border-radius: var(--radius-panel); background: var(--color-surface); }
+.v2DiscoveryForm > label { display: grid; align-items: start; min-width: 190px; gap: 6px; }
+.v2DiscoveryForm > label.v2Keyword { flex: 1 1 280px; }
+.v2DiscoveryForm > label input { width: 100%; }
+.v2DateField { display: grid; gap: 6px; min-width: 265px; color: var(--color-text-secondary); font-size: 13px; font-weight: 600; }
+/* .v2DiscoveryForm > button { min-height: 40px; } 2026-10-24：按钮现统一放入 v2DiscoveryActions。 */
+/* 2026-10-24：本次修改原因：查询与手动录入入口并排，并用竖线表达两种独立操作。 */
+.v2DiscoveryActions { display: flex; align-items: center; gap: 12px; }
+.v2DiscoveryActions button { min-height: 40px; white-space: nowrap; }
+.v2DiscoveryActionDivider { width: 1px; height: 28px; background: var(--color-border, #d9dedb); }
+.v2KeywordOptions { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; }
+.v2KeywordOptions label:last-child { font-weight: 500; }
+.v2KeywordOptions input[type="checkbox"] { min-width: auto; min-height: auto; }
+.v2ProviderNotice { margin: -6px 0 0; color: var(--color-text-muted); font-size: 12px; }
+.v2CandidatePanel { padding-bottom: 12px; }
+/* 2026-10-24：本次修改原因：收录筛选和批量收录按钮在桌面端保持同一行，避免右侧堆成多行。 */
+.v2CandidateActions { flex-wrap: nowrap; justify-content: flex-end; }
+.v2CandidateActions label { white-space: nowrap; }
+.v2CandidateActions select { min-width: 120px; }
+/* 2026-10-24：本次修改原因：全选入口固定在列表左上方，与筛选和批量收录组成同一操作行。 */
+.v2CandidateToolbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin: -4px 0 10px; }
+.v2CandidateSelectionBar { display: flex; align-items: center; gap: 14px; min-width: 0; min-height: 40px;
+  color: var(--color-text-muted); font-size: 12px; }
+.v2SelectCurrentPage { display: inline-flex; align-items: center; gap: 8px; color: var(--color-text-secondary);
+  font-size: 13px; font-weight: 600; cursor: pointer; }
+.v2SelectCurrentPage input { width: 16px; height: 16px; margin: 0; accent-color: var(--color-accent); }
+.v2CandidateRow { display: grid; grid-template-columns: 24px minmax(0, 1fr) minmax(150px, 220px) auto;
+  align-items: center; gap: 12px; padding: 13px 0; border-top: var(--border-ui); }
+.v2CandidateSelect { display: grid; place-items: center; }
+.v2CandidateSelect input { width: 16px; height: 16px; }
+.v2CandidateMain { min-width: 0; }
+.v2CandidateTitle { display: flex; align-items: center; flex-wrap: wrap; gap: 9px; }
+.v2CandidateTitle button { padding: 0; border: 0; background: transparent; color: var(--color-text); font: inherit;
+  font-weight: 650; text-align: left; cursor: pointer; }
+.v2CandidateMetrics { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.v2CandidateMetrics span { padding: 4px 7px; border-radius: 5px; background: var(--color-surface-muted);
+  color: var(--color-text-secondary); font-size: 11px; }
+.v2CandidateMain p { margin: 7px 0 0; color: var(--color-text-secondary); font-size: 12px; line-height: 1.5; }
+.v2CandidateMeta { display: grid; gap: 5px; color: var(--color-text-muted); font-size: 11px; overflow-wrap: anywhere; }
+.v2Status { padding: 3px 7px; border-radius: 99px; background: var(--color-surface-muted); color: var(--color-text-secondary); font-size: 11px; }
+.v2Status.collected { background: var(--color-accent-surface); color: var(--color-accent); }
+.v2PreparationPanel p { color: var(--color-text-secondary); font-size: 13px; }
+.v2DialogBackdrop { position: fixed; inset: 0; z-index: 120; display: grid; place-items: center; padding: 20px;
+  background: rgba(20, 27, 24, .42); }
+.v2ArticleDialog, .v2BatchDialog { display: grid; grid-template-rows: auto minmax(0, 1fr); width: min(940px, 100%);
+  max-height: min(94vh, 980px); overflow: hidden; border-radius: var(--radius-panel); background: var(--color-surface);
+  box-shadow: 0 18px 60px rgba(15, 23, 20, .2); }
+.v2ArticleDialog > header, .v2BatchDialog > header { display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 20px; border-bottom: var(--border-ui); }
+.v2ArticleDialog > header h2, .v2BatchDialog > header h2 { margin: 0; color: var(--color-text); font-size: 18px; }
+.v2ArticleDialog > header button, .v2BatchDialog > header button { border: 0; background: transparent; color: var(--color-text-muted); font-size: 24px; cursor: pointer; }
+.v2ArticleDialog form { overflow: auto; padding: 18px 20px 0; }
+.v2EditorFields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.v2EditorFields label, .v2RightsFields label { display: grid; gap: 6px; color: var(--color-text-secondary); font-size: 12px; font-weight: 600; }
+.v2EditorFields input, .v2EditorFields select, .v2EditorFields textarea, .v2RightsFields input:not([type="checkbox"]) {
+  width: 100%; min-height: 40px; padding: 9px 11px; border: var(--border-ui); border-radius: var(--radius-control);
+  background: var(--color-surface); color: var(--color-text); font: inherit; }
+.v2EditorFields textarea { resize: vertical; line-height: 1.65; }
+.v2RightsFields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 11px 18px;
+  margin: 18px 0 0; padding: 14px; border: var(--border-ui); border-radius: var(--radius-control); }
+.v2RightsFields legend { padding: 0 5px; color: var(--color-text-secondary); font-size: 13px; font-weight: 650; }
+.v2RightsFields label:has(input[type="checkbox"]) { display: flex; align-items: center; font-weight: 500; }
+.v2RightsFields input[type="checkbox"] { width: 16px; height: 16px; }
+.v2EditorWarnings, .v2FormHint, .v2FormError { margin-top: 14px; padding: 10px 12px; border-radius: var(--radius-control);
+  background: var(--color-surface-muted); color: var(--color-text-secondary); font-size: 12px; }
+.v2RightsNotice { margin: 14px 0 0; padding: 11px 13px; border-radius: var(--radius-control);
+  background: var(--color-surface-muted); color: var(--color-text-secondary); font-size: 12px; line-height: 1.55; }
+.v2BatchEvidence { display: grid; gap: 6px; margin: 12px 20px; color: var(--color-text-secondary); font-size: 12px; }
+.v2BatchEvidence input { min-height: 38px; padding: 8px 10px; border: var(--border-ui); border-radius: var(--radius-control);
+  background: var(--color-surface); color: var(--color-text); font: inherit; }
+.v2EditorWarnings p { margin: 4px 0; }
+.v2FormError { background: #fff2f0; color: #9b3e35; }
+.v2ArticleDialog form > footer, .v2BatchDialog > footer { position: sticky; bottom: 0; display: flex; justify-content: flex-end; gap: 9px;
+  margin: 16px -20px 0; padding: 12px 20px; border-top: var(--border-ui); background: var(--color-surface); }
+.v2BatchDialog { width: min(760px, 100%); padding-bottom: 0; }
+.v2BatchDialog > p { margin: 16px 20px 8px; color: var(--color-text-secondary); font-size: 13px; }
+.v2BatchPreview { max-height: 260px; margin: 0 20px; overflow: auto; }
+.v2BatchPreview > div { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 10px;
+  padding: 10px 0; border-bottom: var(--border-ui); font-size: 12px; }
+.v2BatchPreview span { color: var(--color-text-muted); }
+.v2BatchDialog .v2RightsFields { margin: 14px 20px 0; }
+.v2BatchDialog > footer { margin: 0; }
+@media (max-width: 1000px) {
+  .v2Workspace.hasSelection { grid-template-columns: minmax(0, 1fr); }
+  .v2ArticleDetailPanel { position: static; max-height: none; }
+}
+@media (max-width: 1180px) {
+  /* .v2OverviewRow { align-items: flex-start; flex-wrap: wrap; } 2026-10-24：旧概览行已停用，保留注释供回溯。 */
+  .v2LibraryHeader { flex-wrap: wrap; }
+  .v2OverviewRow { align-items: flex-start; flex-wrap: wrap; }
+}
+@media (max-width: 720px) {
+  .v2LibraryHeader, .v2PanelHeading { align-items: flex-start; }
+  .v2Summary { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 7px; }
+  .v2Summary div { min-height: 68px; padding: 9px; }
+  .v2Summary { flex: 1 1 100%; }
+  .v2Filters { flex: 1 1 100%; }
+  .v2DiscoveryForm { align-items: stretch; }
+  .v2DiscoveryForm > label, .v2DateField { flex: 1 1 100%; }
+  .v2DiscoveryActions { flex-wrap: wrap; }
+  .v2PanelHeading { flex-wrap: wrap; }
+  .v2CandidatePanel > .v2PanelHeading { align-items: flex-start; }
+  .v2CandidateToolbar { flex-wrap: wrap; }
+  .v2CandidateActions { width: 100%; justify-content: flex-start; }
+  .v2CandidateSelectionBar { flex-wrap: wrap; }
+  .v2CandidateRow { grid-template-columns: 22px minmax(0, 1fr) auto; }
+  .v2CandidateMeta { grid-column: 2; }
+  .v2CandidateRow > .secondaryButton { grid-column: 3; grid-row: 1 / span 2; }
+  .v2DetailGrid, .v2EditorFields, .v2RightsFields { grid-template-columns: minmax(0, 1fr); }
+  .v2Wide { grid-column: auto; }
+  .v2DetailInlinePair { flex-direction: column; }
+  .v2BatchPreview > div { grid-template-columns: minmax(0, 1fr) auto; }
+  .v2BatchPreview strong { grid-column: 1 / -1; }
+}
